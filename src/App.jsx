@@ -37,11 +37,15 @@ export default function App() {
               {/* ── Super Admin only ───────────────────── */}
               <Route element={<ProtectedRoute allowedRoles={['super_admin']} />}>
                 <Route path="/audit-cycles"  element={<AuditCycles />} />
-                <Route path="/instruments"   element={<InstrumentManagement />} />
                 <Route path="/units"         element={<UnitManagement />} />
                 <Route path="/users"         element={<UserManagement />} />
                 <Route path="/reports"       element={<PlaceholderPage title="Laporan & Rekap" />} />
                 <Route path="/settings"      element={<PlaceholderPage title="Pengaturan Sistem" />} />
+              </Route>
+
+              {/* ── Super Admin + Pimpinan ─────────────── */}
+              <Route element={<ProtectedRoute allowedRoles={['super_admin', 'pimpinan', 'kepala_lpmpp']} />}>
+                <Route path="/instruments"   element={<InstrumentManagement />} />
               </Route>
 
               {/* ── Auditee only ───────────────────────── */}

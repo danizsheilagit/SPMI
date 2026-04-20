@@ -40,9 +40,10 @@ const menuConfig = {
     { label: 'Laporan Audit', to: '/audit-reports', icon: FileText },
   ],
   pimpinan: [
-    { label: 'Dashboard', to: '/dashboard', icon: LayoutDashboard },
-    { label: 'Ringkasan Mutu', to: '/summary', icon: BarChart3 },
-    { label: 'Laporan Audit', to: '/audit-reports', icon: FileText },
+    { label: 'Dashboard',       to: '/dashboard',    icon: LayoutDashboard },
+    { label: 'Instrumen',       to: '/instruments',  icon: FileText },
+    { label: 'Ringkasan Mutu',  to: '/summary',      icon: BarChart3 },
+    { label: 'Laporan Audit',   to: '/audit-reports', icon: FileText },
   ],
 }
 

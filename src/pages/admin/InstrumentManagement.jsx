@@ -9,7 +9,8 @@ import { useAuth } from '../../contexts/AuthContext'
 import { SkeletonGrid } from '../../components/UI/Skeleton'
 
 export default function InstrumentManagement() {
-  const { user } = useAuth()
+  const { user, role } = useAuth()
+  const isAdmin = role === 'super_admin'
   const [instruments, setInstruments] = useState([])
   const [components, setComponents] = useState({}) // { instrument_id: [...] }
   const [expanded, setExpanded] = useState(null)
@@ -184,21 +185,24 @@ export default function InstrumentManagement() {
                     </span>
                   )}
 
-                  <label className={`inline-flex items-center gap-1.5 cursor-pointer rounded border px-3 py-1.5 text-xs font-medium transition-colors ${
-                    uploadingId === inst.id ? 'border-gray-200 text-gray-400' : 'border-blue-200 text-blue-700 hover:bg-blue-50'
-                  }`}>
-                    {uploadingId === inst.id ? (
-                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                    ) : (
-                      <Upload className="h-3.5 w-3.5" />
-                    )}
-                    {inst.pdf_storage_path ? 'Ganti PDF' : 'Upload PDF'}
-                    <input
-                      type="file" accept="application/pdf" className="hidden"
-                      disabled={uploadingId === inst.id}
-                      onChange={e => handlePDFUpload(inst, e.target.files?.[0])}
-                    />
-                  </label>
+                  {/* Upload PDF — hanya admin */}
+                  {isAdmin && (
+                    <label className={`inline-flex items-center gap-1.5 cursor-pointer rounded border px-3 py-1.5 text-xs font-medium transition-colors ${
+                      uploadingId === inst.id ? 'border-gray-200 text-gray-400' : 'border-blue-200 text-blue-700 hover:bg-blue-50'
+                    }`}>
+                      {uploadingId === inst.id ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        <Upload className="h-3.5 w-3.5" />
+                      )}
+                      {inst.pdf_storage_path ? 'Ganti PDF' : 'Upload PDF'}
+                      <input
+                        type="file" accept="application/pdf" className="hidden"
+                        disabled={uploadingId === inst.id}
+                        onChange={e => handlePDFUpload(inst, e.target.files?.[0])}
+                      />
+                    </label>
+                  )}
                 </div>
 
                 <button onClick={() => toggleExpand(inst.id)}
@@ -219,17 +223,19 @@ export default function InstrumentManagement() {
                             <p className="text-sm font-medium text-gray-800">{comp.name}</p>
                             {comp.description && <p className="text-xs text-gray-400">{comp.description}</p>}
                           </div>
-                          <button onClick={() => handleDeleteComponent(comp.id, inst.id)}
-                            className="p-1.5 text-gray-300 hover:text-red-500 rounded transition-colors">
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </button>
+                          {isAdmin && (
+                            <button onClick={() => handleDeleteComponent(comp.id, inst.id)}
+                              className="p-1.5 text-gray-300 hover:text-red-500 rounded transition-colors">
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </button>
+                          )}
                         </div>
                       ))}
                     </div>
                   )}
 
-                  {/* Add component form */}
-                  {addingComp === inst.id ? (
+                  {/* Tambah butir — hanya admin */}
+                  {isAdmin && (addingComp === inst.id ? (
                     <div className="px-5 py-4 bg-blue-50/40 border-t border-blue-100">
                       <p className="text-xs font-semibold text-blue-700 mb-3">Tambah Butir Penilaian</p>
                       <div className="grid grid-cols-2 gap-3 mb-3">
@@ -261,7 +267,7 @@ export default function InstrumentManagement() {
                         <Plus className="h-3.5 w-3.5" /> Tambah Butir Penilaian
                       </button>
                     </div>
-                  )}
+                  ))}
                 </div>
               )}
             </div>
