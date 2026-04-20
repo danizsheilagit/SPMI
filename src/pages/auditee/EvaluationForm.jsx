@@ -8,7 +8,7 @@
  * Scoring: kumulatif sequential (0–5 per butir)
  * Bukti: wajib upload per tahap PPEPP yang terpenuhi
  */
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Save, Send, AlertCircle, Loader2, ChevronLeft, BarChart2 } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
@@ -32,6 +32,43 @@ export default function EvaluationForm() {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState(null)
   const [saved, setSaved] = useState(false)
+
+  // ── Resize split pane ────────────────────────────────────
+  const [leftWidth, setLeftWidth] = useState(42) // percent
+  const isDragging = useRef(false)
+  const containerRef = useRef(null)
+  const startX = useRef(0)
+  const startW = useRef(0)
+
+  function startDrag(e) {
+    isDragging.current = true
+    startX.current = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX
+    startW.current = leftWidth
+    document.body.style.cursor = 'col-resize'
+    document.body.style.userSelect = 'none'
+
+    function onMove(ev) {
+      if (!isDragging.current) return
+      const clientX = ev.type === 'touchmove' ? ev.touches[0].clientX : ev.clientX
+      const dx = clientX - startX.current
+      const containerW = containerRef.current?.offsetWidth || 1
+      const newPct = Math.min(70, Math.max(20, startW.current + (dx / containerW) * 100))
+      setLeftWidth(newPct)
+    }
+    function stopDrag() {
+      isDragging.current = false
+      document.body.style.cursor = ''
+      document.body.style.userSelect = ''
+      document.removeEventListener('mousemove', onMove)
+      document.removeEventListener('mouseup', stopDrag)
+      document.removeEventListener('touchmove', onMove)
+      document.removeEventListener('touchend', stopDrag)
+    }
+    document.addEventListener('mousemove', onMove)
+    document.addEventListener('mouseup', stopDrag)
+    document.addEventListener('touchmove', onMove, { passive: false })
+    document.addEventListener('touchend', stopDrag)
+  }
 
   useEffect(() => { loadData() }, [unitInstrumentId])
 
@@ -224,9 +261,10 @@ export default function EvaluationForm() {
       </div>
 
       {/* ── Main split layout ────────────────────────────────── */}
-      <div className="flex flex-1 overflow-hidden">
+      <div ref={containerRef} className="flex flex-1 overflow-hidden">
         {/* Left — PDF Viewer */}
-        <div className="w-[42%] border-r border-gray-200 bg-gray-100 flex flex-col shrink-0">
+        <div className="border-r border-gray-200 bg-gray-100 flex flex-col shrink-0 overflow-hidden"
+          style={{ width: `${leftWidth}%` }}>
           <div className="px-4 py-2 border-b border-gray-200 bg-white">
             <p className="text-xs font-medium text-gray-500">📄 Dokumen Instrumen</p>
           </div>
@@ -236,6 +274,20 @@ export default function EvaluationForm() {
               bucket="instrument-pdfs"
               height="100%"
             />
+          </div>
+        </div>
+
+        {/* ── Drag Handle ── */}
+        <div
+          onMouseDown={startDrag}
+          onTouchStart={startDrag}
+          className="w-[6px] shrink-0 cursor-col-resize bg-gray-200 hover:bg-blue-400 active:bg-blue-500 transition-colors flex items-center justify-center group"
+          title="Seret untuk mengubah ukuran"
+        >
+          <div className="flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="w-1 h-1 rounded-full bg-white" />
+            ))}
           </div>
         </div>
 
