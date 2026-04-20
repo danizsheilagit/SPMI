@@ -3,7 +3,7 @@
  * Upload PDF per instrumen + kelola butir penilaian (instrument_components).
  */
 import { useEffect, useState } from 'react'
-import { Upload, Plus, Trash2, FileText, ChevronDown, ChevronUp, Loader2 } from 'lucide-react'
+import { Upload, Plus, Trash2, FileText, ChevronDown, ChevronUp, Loader2, Eye, X, ExternalLink } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../contexts/AuthContext'
 import { SkeletonGrid } from '../../components/UI/Skeleton'
@@ -18,6 +18,11 @@ export default function InstrumentManagement() {
   const [addingComp, setAddingComp] = useState(null) // instrument_id
   const [compForm, setCompForm] = useState({ code: '', name: '', description: '', sort_order: 0 })
   const [savingComp, setSavingComp] = useState(false)
+
+  // PDF Viewer
+  const [viewingPdf, setViewingPdf] = useState(null) // { name, path }
+  const [pdfUrl, setPdfUrl]         = useState(null)
+  const [loadingPdf, setLoadingPdf] = useState(false)
 
   useEffect(() => { fetchInstruments() }, [])
 
@@ -108,6 +113,36 @@ export default function InstrumentManagement() {
     await fetchComponents(instrumentId)
   }
 
+  async function handleViewPdf(inst) {
+    setViewingPdf(inst)
+    setPdfUrl(null)
+    setLoadingPdf(true)
+    try {
+      // Coba signed URL dulu (untuk bucket private)
+      const { data, error } = await supabase.storage
+        .from('instrument-pdfs')
+        .createSignedUrl(inst.pdf_storage_path, 3600)
+      if (!error && data?.signedUrl) {
+        setPdfUrl(data.signedUrl)
+      } else {
+        // Fallback: public URL
+        const { data: pub } = supabase.storage
+          .from('instrument-pdfs')
+          .getPublicUrl(inst.pdf_storage_path)
+        setPdfUrl(pub?.publicUrl)
+      }
+    } catch (err) {
+      console.error('PDF URL error:', err)
+    } finally {
+      setLoadingPdf(false)
+    }
+  }
+
+  function closePdfViewer() {
+    setViewingPdf(null)
+    setPdfUrl(null)
+  }
+
   if (loading) return <SkeletonGrid cols={1} rows={4} />
 
   return (
@@ -137,9 +172,12 @@ export default function InstrumentManagement() {
                 {/* PDF status & upload */}
                 <div className="flex items-center gap-3">
                   {inst.pdf_storage_path ? (
-                    <span className="flex items-center gap-1.5 text-xs text-green-600 bg-green-50 border border-green-200 rounded px-2.5 py-1">
-                      <FileText className="h-3.5 w-3.5" /> PDF Tersedia
-                    </span>
+                    <button
+                      onClick={() => handleViewPdf(inst)}
+                      className="flex items-center gap-1.5 text-xs text-green-600 bg-green-50 border border-green-200 rounded px-2.5 py-1 hover:bg-green-100 transition-colors"
+                    >
+                      <Eye className="h-3.5 w-3.5" /> PDF Tersedia
+                    </button>
                   ) : (
                     <span className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded px-2.5 py-1">
                       PDF Belum Diunggah
@@ -230,6 +268,56 @@ export default function InstrumentManagement() {
           )
         })}
       </div>
+
+      {/* ── PDF Viewer Modal ────────────────────────────────────── */}
+      {viewingPdf && (
+        <div className="fixed inset-0 z-50 flex flex-col bg-black/80">
+          {/* Toolbar */}
+          <div className="flex items-center justify-between bg-gray-900 px-5 py-3 shrink-0">
+            <div className="flex items-center gap-3">
+              <FileText className="h-4 w-4 text-green-400" />
+              <div>
+                <p className="text-sm font-semibold text-white">{viewingPdf.name}</p>
+                <p className="text-xs text-gray-400">{viewingPdf.code}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              {pdfUrl && (
+                <a href={pdfUrl} target="_blank" rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 rounded border border-gray-600 px-3 py-1.5 text-xs text-gray-300 hover:text-white hover:border-gray-400 transition-colors">
+                  <ExternalLink className="h-3.5 w-3.5" /> Buka di Tab Baru
+                </a>
+              )}
+              <button onClick={closePdfViewer}
+                className="rounded border border-gray-600 p-1.5 text-gray-300 hover:text-white hover:border-gray-400 transition-colors">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+
+          {/* iframe area */}
+          <div className="flex-1 relative bg-gray-800">
+            {loadingPdf ? (
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-gray-400">
+                <Loader2 className="h-8 w-8 animate-spin" />
+                <p className="text-sm">Memuat PDF...</p>
+              </div>
+            ) : pdfUrl ? (
+              <iframe
+                src={pdfUrl}
+                title={viewingPdf.name}
+                className="w-full h-full border-0"
+                allow="fullscreen"
+              />
+            ) : (
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-gray-400">
+                <FileText className="h-10 w-10 opacity-30" />
+                <p className="text-sm">Gagal memuat PDF. Coba buka di tab baru.</p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
