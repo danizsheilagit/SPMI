@@ -1,0 +1,142 @@
+/**
+ * QASYS Sidebar Navigation
+ * Cloudflare-inspired dark sidebar with role-aware menu items
+ */
+import { NavLink, useLocation } from 'react-router-dom'
+import {
+  LayoutDashboard,
+  ClipboardList,
+  Search,
+  FileText,
+  BarChart3,
+  Settings,
+  Users,
+  Building2,
+  ChevronRight,
+} from 'lucide-react'
+import { useAuth } from '../../contexts/AuthContext'
+
+// Menu items per role
+const menuConfig = {
+  super_admin: [
+    { label: 'Dashboard', to: '/dashboard', icon: LayoutDashboard },
+    { label: 'Siklus Audit', to: '/audit-cycles', icon: ClipboardList },
+    { label: 'Instrumen', to: '/instruments', icon: FileText },
+    { label: 'Unit & Prodi', to: '/units', icon: Building2 },
+    { label: 'Manajemen Pengguna', to: '/users', icon: Users },
+    { label: 'Laporan & Rekap', to: '/reports', icon: BarChart3 },
+    { label: 'Pengaturan', to: '/settings', icon: Settings },
+  ],
+  auditee: [
+    { label: 'Dashboard', to: '/dashboard', icon: LayoutDashboard },
+    { label: 'Evaluasi Diri', to: '/self-evaluation', icon: ClipboardList },
+    { label: 'Rencana Tindak Lanjut', to: '/rtl', icon: FileText },
+    { label: 'Riwayat Audit', to: '/history', icon: BarChart3 },
+  ],
+  auditor: [
+    { label: 'Dashboard', to: '/dashboard', icon: LayoutDashboard },
+    { label: 'Penugasan Audit', to: '/assignments', icon: ClipboardList },
+    { label: 'Temuan Audit', to: '/findings', icon: Search },
+    { label: 'Laporan Audit', to: '/audit-reports', icon: FileText },
+  ],
+  pimpinan: [
+    { label: 'Dashboard', to: '/dashboard', icon: LayoutDashboard },
+    { label: 'Ringkasan Mutu', to: '/summary', icon: BarChart3 },
+    { label: 'Laporan Audit', to: '/audit-reports', icon: FileText },
+  ],
+}
+
+const roleLabels = {
+  super_admin:  'Super Admin',
+  kepala_lpmpp: 'Kepala LPMPP',
+  auditee: 'Auditee',
+  auditor: 'Auditor',
+  pimpinan: 'Pimpinan',
+}
+
+export default function Sidebar({ collapsed = false }) {
+  const { profile, role, signOut } = useAuth()
+  const location = useLocation()
+  const menuItems = menuConfig[role] || []
+
+  return (
+    <aside
+      className={`flex flex-col bg-gray-900 text-white transition-all duration-300 ${
+        collapsed ? 'w-16' : 'w-64'
+      } min-h-screen`}
+    >
+      {/* Logo / Brand */}
+      <div className="flex items-center gap-3 px-4 py-4 border-b border-gray-800">
+        <img
+          src="/logo-sys.png"
+          alt="STIKOM Yos Sudarso"
+          className={`object-contain shrink-0 ${collapsed ? 'w-8 h-8' : 'w-10 h-10'}`}
+        />
+        {!collapsed && (
+          <div>
+            <span className="text-base font-bold tracking-wide text-white">QASYS</span>
+            <p className="text-[10px] text-gray-400 leading-tight">SPMI · STIKOM Yos Sudarso</p>
+          </div>
+        )}
+      </div>
+
+      {/* Role Badge */}
+      {!collapsed && role && (
+        <div className="mx-3 mt-3 mb-1 px-3 py-1.5 rounded bg-blue-900/40 border border-blue-800/60">
+          <p className="text-[11px] text-blue-300 font-medium">{roleLabels[role] ?? role}</p>
+          <p className="text-[10px] text-gray-400 truncate">{profile?.full_name ?? profile?.email ?? '—'}</p>
+        </div>
+      )}
+
+      {/* Navigation */}
+      <nav className="flex-1 px-2 py-3 space-y-0.5 overflow-y-auto">
+        {menuItems.map((item) => {
+          const Icon = item.icon
+          const isActive = location.pathname === item.to ||
+            location.pathname.startsWith(item.to + '/')
+
+          return (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              className={`
+                flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium
+                transition-colors duration-150 group
+                ${isActive
+                  ? 'bg-blue-600 text-white'
+                  : 'text-gray-400 hover:text-white hover:bg-gray-800'
+                }
+              `}
+            >
+              <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-white' : 'text-gray-500 group-hover:text-gray-300'}`} />
+              {!collapsed && (
+                <>
+                  <span className="flex-1 truncate">{item.label}</span>
+                  {isActive && <ChevronRight className="w-3.5 h-3.5 text-blue-200" />}
+                </>
+              )}
+            </NavLink>
+          )
+        })}
+      </nav>
+
+      {/* Sign Out */}
+      <div className="px-2 pb-4 border-t border-gray-800 pt-3">
+        <button
+          onClick={signOut}
+          className={`
+            w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm
+            text-gray-400 hover:text-white hover:bg-gray-800
+            transition-colors duration-150
+          `}
+        >
+          <svg className="w-4 h-4 shrink-0 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1" />
+          </svg>
+          {!collapsed && <span>Keluar</span>}
+        </button>
+      </div>
+    </aside>
+  )
+}
