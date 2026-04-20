@@ -35,12 +35,7 @@ const menuConfig = {
     { label: 'Rencana Tindak Lanjut', to: '/rtl', icon: FileText },
     { label: 'Riwayat Audit', to: '/history', icon: BarChart3 },
   ],
-  auditor: [
-    { label: 'Dashboard', to: '/dashboard', icon: LayoutDashboard },
-    { label: 'Penugasan Audit', to: '/assignments', icon: ClipboardList },
-    { label: 'Temuan Audit', to: '/findings', icon: Search },
-    { label: 'Laporan Audit', to: '/audit-reports', icon: FileText },
-  ],
+  auditor: [],   // Auditor bukan role navigasi — fungsi via is_auditor flag
   pimpinan: [
     { label: 'Dashboard',       to: '/dashboard',    icon: LayoutDashboard },
     { label: 'Instrumen',       to: '/instruments',  icon: FileText },

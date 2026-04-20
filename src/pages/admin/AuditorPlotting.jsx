@@ -28,7 +28,10 @@ export default function AuditorPlotting() {
   async function loadInitial() {
     const [cycleRes, auditorRes] = await Promise.allSettled([
       supabase.from('audit_cycles').select('id, name, is_active').order('created_at', { ascending: false }),
-      supabase.from('profiles').select('id, full_name, email, avatar_url').eq('role', 'auditor').order('full_name'),
+      supabase.from('profiles')
+        .select('id, full_name, email, avatar_url, role')
+        .eq('is_auditor', true)
+        .order('full_name'),
     ])
     const cycleData   = cycleRes.value?.data   || []
     const auditorData = auditorRes.value?.data  || []
