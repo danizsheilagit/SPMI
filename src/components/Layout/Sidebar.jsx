@@ -12,6 +12,7 @@ import {
   Settings,
   Users,
   Building2,
+  UserSearch,
   ChevronRight,
 } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
@@ -19,13 +20,14 @@ import { useAuth } from '../../contexts/AuthContext'
 // Menu items per role
 const menuConfig = {
   super_admin: [
-    { label: 'Dashboard', to: '/dashboard', icon: LayoutDashboard },
-    { label: 'Siklus Audit', to: '/audit-cycles', icon: ClipboardList },
-    { label: 'Instrumen', to: '/instruments', icon: FileText },
-    { label: 'Unit & Prodi', to: '/units', icon: Building2 },
-    { label: 'Manajemen Pengguna', to: '/users', icon: Users },
-    { label: 'Laporan & Rekap', to: '/reports', icon: BarChart3 },
-    { label: 'Pengaturan', to: '/settings', icon: Settings },
+    { label: 'Dashboard',           to: '/dashboard',         icon: LayoutDashboard },
+    { label: 'Siklus Audit',        to: '/audit-cycles',      icon: ClipboardList },
+    { label: 'Instrumen',           to: '/instruments',       icon: FileText },
+    { label: 'Unit & Prodi',        to: '/units',             icon: Building2 },
+    { label: 'Plotting Auditor',    to: '/auditor-plotting',  icon: UserSearch },
+    { label: 'Manajemen Pengguna',  to: '/users',             icon: Users },
+    { label: 'Laporan & Rekap',     to: '/reports',           icon: BarChart3 },
+    { label: 'Pengaturan',          to: '/settings',          icon: Settings },
   ],
   auditee: [
     { label: 'Dashboard', to: '/dashboard', icon: LayoutDashboard },

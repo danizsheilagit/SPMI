@@ -10,10 +10,11 @@ import Dashboard from './pages/Dashboard'
 import Unauthorized from './pages/Unauthorized'
 
 // Admin pages
-import AuditCycles from './pages/admin/AuditCycles'
+import AuditCycles         from './pages/admin/AuditCycles'
 import InstrumentManagement from './pages/admin/InstrumentManagement'
-import UnitManagement from './pages/admin/UnitManagement'
-import UserManagement from './pages/admin/UserManagement'
+import UnitManagement      from './pages/admin/UnitManagement'
+import UserManagement      from './pages/admin/UserManagement'
+import AuditorPlotting     from './pages/admin/AuditorPlotting'
 
 // Auditee pages
 import SelfEvaluation from './pages/auditee/SelfEvaluation'
@@ -36,11 +37,12 @@ export default function App() {
 
               {/* ── Super Admin only ───────────────────── */}
               <Route element={<ProtectedRoute allowedRoles={['super_admin']} />}>
-                <Route path="/audit-cycles"  element={<AuditCycles />} />
-                <Route path="/units"         element={<UnitManagement />} />
-                <Route path="/users"         element={<UserManagement />} />
-                <Route path="/reports"       element={<PlaceholderPage title="Laporan & Rekap" />} />
-                <Route path="/settings"      element={<PlaceholderPage title="Pengaturan Sistem" />} />
+                <Route path="/audit-cycles"     element={<AuditCycles />} />
+                <Route path="/units"            element={<UnitManagement />} />
+                <Route path="/users"            element={<UserManagement />} />
+                <Route path="/auditor-plotting" element={<AuditorPlotting />} />
+                <Route path="/reports"          element={<PlaceholderPage title="Laporan & Rekap" />} />
+                <Route path="/settings"         element={<PlaceholderPage title="Pengaturan Sistem" />} />
               </Route>
 
               {/* ── Super Admin + Pimpinan ─────────────── */}
