@@ -355,6 +355,7 @@ export default function UnitManagement() {
                         <p className="text-sm font-medium text-gray-800">{inst.name}</p>
                         <p className="text-xs text-gray-400">{inst.code}</p>
                       </div>
+                    </div>
                   </div>
                 )
               })}
