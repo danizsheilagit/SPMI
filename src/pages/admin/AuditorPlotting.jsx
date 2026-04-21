@@ -318,8 +318,9 @@ export default function AuditorPlotting() {
       ) : (
         <div className="space-y-4">
           {Object.values(grouped).map(({ unit, items }) => {
-            const unitPlotted = items.filter(ui => (localAuditors[ui.id] || []).length > 0).length
-            const allDone     = unitPlotted === items.length
+            const unitPlotted        = items.filter(ui => (localAuditors[ui.id] || []).length > 0).length
+            const totalUnitAuditors  = items.reduce((sum, ui) => sum + (localAuditors[ui.id] || []).length, 0)
+            const allDone            = unitPlotted === items.length
 
             return (
               <div key={unit?.id} className="rounded-md border border-gray-200 bg-white shadow-sm overflow-visible">
@@ -333,8 +334,10 @@ export default function AuditorPlotting() {
                     <p className="text-sm font-semibold text-gray-900">{unit?.name}</p>
                     <p className="text-xs text-gray-400">{unit?.code} · {unit?.type}</p>
                   </div>
-                  <span className={`text-xs font-medium rounded-full px-2.5 py-0.5 ${allDone ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
-                    {unitPlotted}/{items.length} diplot
+                  <span className={`text-xs font-medium rounded-full px-2.5 py-0.5 ${
+                    totalUnitAuditors > 0 ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'
+                  }`}>
+                    {totalUnitAuditors === 0 ? 'Belum Diplot' : `${totalUnitAuditors} Auditor`}
                   </span>
                 </div>
 
