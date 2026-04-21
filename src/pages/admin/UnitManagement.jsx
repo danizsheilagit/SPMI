@@ -3,7 +3,7 @@
  * CRUD units + assign instruments per unit per cycle.
  */
 import { useEffect, useState, useCallback } from 'react'
-import { Plus, Building2, Link2, Loader2, X, UserCheck, AlertCircle, Check, Pencil, Trash2 } from 'lucide-react'
+import { Plus, Building2, Link2, Loader2, X, AlertCircle, Check, Pencil, Trash2 } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { SkeletonGrid } from '../../components/UI/Skeleton'
 
@@ -11,7 +11,6 @@ export default function UnitManagement() {
   const [units, setUnits] = useState([])
   const [instruments, setInstruments] = useState([])
   const [cycles, setCycles] = useState([])
-  const [auditors, setAuditors] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
@@ -37,11 +36,10 @@ export default function UnitManagement() {
     setLoading(true)
     setError(null)
     try {
-      const [u, i, c, a] = await Promise.allSettled([
+      const [u, i, c] = await Promise.allSettled([
         supabase.from('units').select('*').eq('is_active', true).order('name'),
         supabase.from('instruments').select('id, code, name').eq('is_active', true).order('code'),
         supabase.from('audit_cycles').select('id, name, academic_year, semester, is_active').order('created_at', { ascending: false }),
-        supabase.from('profiles').select('id, full_name, email').eq('role', 'auditor'),
       ])
 
       if (u.status === 'fulfilled') setUnits(u.value.data || [])
@@ -53,7 +51,6 @@ export default function UnitManagement() {
         const active = cycles.find(x => x.is_active) || cycles[0]
         if (active) setSelectedCycle(active.id)
       }
-      if (a.status === 'fulfilled') setAuditors(a.value.data || [])
     } catch (err) {
       setError(err.message)
     } finally {
@@ -65,7 +62,7 @@ export default function UnitManagement() {
     if (!unitId || !cycleId) { setAssignments([]); return }
     const { data } = await supabase
       .from('unit_instruments')
-      .select('id, instrument_id, assigned_auditor')
+      .select('id, instrument_id')
       .eq('unit_id', unitId)
       .eq('cycle_id', cycleId)
     setAssignments(data || [])
@@ -106,12 +103,6 @@ export default function UnitManagement() {
     }
   }
 
-  async function assignAuditor(unitInstrumentId, auditorId) {
-    await supabase.from('unit_instruments')
-      .update({ assigned_auditor: auditorId || null })
-      .eq('id', unitInstrumentId)
-    await fetchAssignments(assignTarget.id, selectedCycle)
-  }
 
   async function handleSaveUnit(e) {
     e.preventDefault()
@@ -364,24 +355,6 @@ export default function UnitManagement() {
                         <p className="text-sm font-medium text-gray-800">{inst.name}</p>
                         <p className="text-xs text-gray-400">{inst.code}</p>
                       </div>
-                    </div>
-
-                    {/* Assign auditor (only if instrument is assigned) */}
-                    {assigned && auditors.length > 0 && (
-                      <div className="mt-2 ml-8 flex items-center gap-2">
-                        <UserCheck className="h-3.5 w-3.5 text-gray-400 shrink-0" />
-                        <select
-                          value={assigned.assigned_auditor || ''}
-                          onChange={e => assignAuditor(assigned.id, e.target.value)}
-                          className="flex-1 rounded border border-gray-200 px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-blue-400"
-                        >
-                          <option value="">— Pilih Auditor —</option>
-                          {auditors.map(a => (
-                            <option key={a.id} value={a.id}>{a.full_name || a.email}</option>
-                          ))}
-                        </select>
-                      </div>
-                    )}
                   </div>
                 )
               })}
