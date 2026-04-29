@@ -153,26 +153,27 @@ export default function Sidebar({ collapsed = false }) {
   // Grup menu dari role
   let groups = menuConfig[role] || []
 
-  // Auditee + fungsi auditor → tambah Standar + Penugasan Audit + Verifikasi RTL
+  // Auditee + fungsi auditor → tambah Standar ke menu Evaluasi
   if (role === 'auditee' && isAuditorFunc) {
     groups = groups.map(g =>
       g.group === 'Evaluasi'
         ? { ...g, items: [...g.items, { label: 'Standar', to: '/standards', icon: BookOpen }] }
         : g
     )
-    // Tambah grup Audit jika belum ada
-    if (!groups.some(g => g.group === 'Audit')) {
-      groups = [
-        ...groups,
-        {
-          group: 'Audit',
-          items: [
-            { label: 'Penugasan Audit', to: '/auditor/assignments', icon: ClipboardCheck },
-            { label: 'Verifikasi RTL',  to: '/rtl-verification',    icon: ClipboardList  },
-          ],
-        },
-      ]
-    }
+  }
+
+  // Semua user dengan fungsi auditor → tampilkan menu Audit (Penugasan + Verifikasi RTL)
+  if (isAuditorFunc && !groups.some(g => g.group === 'Audit')) {
+    groups = [
+      ...groups,
+      {
+        group: 'Audit',
+        items: [
+          { label: 'Penugasan Audit', to: '/auditor/assignments', icon: ClipboardCheck },
+          { label: 'Verifikasi RTL',  to: '/rtl-verification',    icon: ClipboardList  },
+        ],
+      },
+    ]
   }
 
   return (
