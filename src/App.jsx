@@ -25,6 +25,17 @@ import EvaluationForm from './pages/auditee/EvaluationForm'
 import AuditorAssignments from './pages/auditor/AuditorAssignments'
 import AuditorAuditDetail from './pages/auditor/AuditorAuditDetail'
 
+// Pimpinan pages
+import RTMPage   from './pages/pimpinan/RTMPage'
+import RTMDetail from './pages/pimpinan/RTMDetail'
+
+// Shared admin pages
+import RTLVerification from './pages/admin/RTLVerification'
+import Reports         from './pages/admin/Reports'
+
+// Auditee pages (RTL)
+import RTLPage from './pages/auditee/RTLPage'
+
 export default function App() {
   return (
     <BrowserRouter>
@@ -64,7 +75,7 @@ export default function App() {
               <Route element={<ProtectedRoute allowedRoles={['auditee']} />}>
                 <Route path="/self-evaluation"                   element={<SelfEvaluation />} />
                 <Route path="/self-evaluation/:unitInstrumentId" element={<EvaluationForm />} />
-                <Route path="/rtl"                               element={<PlaceholderPage title="Rencana Tindak Lanjut" />} />
+                <Route path="/rtl"                               element={<RTLPage />} />
                 <Route path="/history"                           element={<PlaceholderPage title="Riwayat Audit" />} />
               </Route>
 
@@ -76,7 +87,19 @@ export default function App() {
 
               {/* ── Pimpinan only ──────────────────────── */}
               <Route element={<ProtectedRoute allowedRoles={['pimpinan']} />}>
-                <Route path="/summary"       element={<PlaceholderPage title="Ringkasan Mutu" />} />
+                <Route path="/rtm"     element={<RTMPage />} />
+                <Route path="/rtm/:rtmId" element={<RTMDetail />} />
+                <Route path="/summary" element={<PlaceholderPage title="Ringkasan Mutu" />} />
+              </Route>
+
+              {/* ── Super Admin + Kepala LPMPP + Pimpinan ──────── */}
+              <Route element={<ProtectedRoute allowedRoles={['super_admin', 'kepala_lpmpp', 'pimpinan']} />}>
+                <Route path="/reports" element={<Reports />} />
+              </Route>
+
+              {/* ── Super Admin + Auditor: Verifikasi RTL ──────── */}
+              <Route element={<ProtectedRoute allowedRoles={['super_admin', 'auditor']} allowAuditorFunc />}>
+                <Route path="/rtl-verification" element={<RTLVerification />} />
               </Route>
             </Route>
 

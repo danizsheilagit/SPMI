@@ -40,9 +40,10 @@ const menuConfig = {
     {
       group: 'Administrasi',
       items: [
-        { label: 'Manajemen Pengguna', to: '/users',    icon: Users },
-        { label: 'Laporan & Rekap',    to: '/reports',  icon: BarChart3 },
-        { label: 'Pengaturan',         to: '/settings', icon: Settings },
+        { label: 'Manajemen Pengguna', to: '/users',              icon: Users     },
+        { label: 'Verifikasi RTL',     to: '/rtl-verification',   icon: ClipboardCheck },
+        { label: 'Laporan & Rekap',    to: '/reports',            icon: BarChart3 },
+        { label: 'Pengaturan',         to: '/settings',           icon: Settings  },
       ],
     },
   ],
@@ -120,17 +121,17 @@ const menuConfig = {
       ],
     },
     {
+      group: 'AMI',
+      items: [
+        { label: 'Rapat Tinjau Manajemen', to: '/rtm',     icon: ClipboardList },
+        { label: 'Laporan & Rekap',        to: '/reports', icon: BarChart3     },
+      ],
+    },
+    {
       group: 'Referensi',
       items: [
         { label: 'Instrumen', to: '/instruments', icon: FileText },
         { label: 'Standar',   to: '/standards',   icon: BookOpen },
-      ],
-    },
-    {
-      group: 'Laporan',
-      items: [
-        { label: 'Ringkasan Mutu', to: '/summary',       icon: BarChart3 },
-        { label: 'Laporan Audit',  to: '/audit-reports', icon: FileText },
       ],
     },
   ],
