@@ -92,8 +92,14 @@ export default function AuditorAssignments() {
     }
   }
 
-  function canAudit(submission) {
-    return submission && ['submitted', 'under_review'].includes(submission.status)
+  function canViewOrAudit(submission) {
+    return submission && ['submitted', 'under_review', 'verified', 'closed'].includes(submission.status)
+  }
+
+  function getButtonLabel(status) {
+    if (status === 'verified' || status === 'closed') return 'Lihat Hasil'
+    if (status === 'under_review') return 'Lanjut Audit'
+    return 'Mulai Audit'
   }
 
   const filtered = assignments.filter(a => {
@@ -230,14 +236,16 @@ export default function AuditorAssignments() {
                   {/* Action */}
                   <button
                     onClick={() => navigate(`/auditor/audit/${a.uiId}`)}
-                    disabled={!auditable}
+                    disabled={!canViewOrAudit(a.submission)}
                     className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
-                      auditable
+                      status === 'verified' || status === 'closed'
+                        ? 'border border-gray-300 text-gray-600 hover:bg-gray-50'
+                        : canViewOrAudit(a.submission)
                         ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm'
                         : 'border border-gray-200 text-gray-400 cursor-not-allowed'
                     }`}
                   >
-                    {status === 'under_review' ? 'Lanjut Audit' : 'Mulai Audit'}
+                    {getButtonLabel(status)}
                     <ArrowRight className="h-3 w-3" />
                   </button>
                 </div>
