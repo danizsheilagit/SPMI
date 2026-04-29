@@ -124,7 +124,7 @@ export function AuthProvider({ children }) {
     isAuditee:      profile?.role === 'auditee',
     isPimpinan:     profile?.role === 'pimpinan',
     isKepalaLpmpp:  profile?.role === 'kepala_lpmpp',
-    isAuditorFunc:  profile?.is_auditor ?? false,  // fungsi auditor (bukan role)
+    isAuditorFunc:  (profile?.is_auditor ?? false) || profile?.role === 'auditor',  // aktif jika flag atau role=auditor
   }
 
   return (

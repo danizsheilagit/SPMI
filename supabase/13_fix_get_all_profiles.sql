@@ -1,7 +1,12 @@
 -- ================================================================
 -- QASYS — Fix: tambah is_auditor ke RPC get_all_profiles
+-- Harus DROP dulu karena return type berubah
 -- ================================================================
 
+-- Step 1: Drop function lama
+DROP FUNCTION IF EXISTS public.get_all_profiles();
+
+-- Step 2: Recreate dengan is_auditor
 CREATE OR REPLACE FUNCTION public.get_all_profiles()
 RETURNS TABLE(
   id          uuid,

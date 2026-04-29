@@ -51,8 +51,8 @@ export default function App() {
                 <Route path="/instruments" element={<InstrumentManagement />} />
               </Route>
 
-              {/* ── Standar: Super Admin, Kepala LPMPP, Pimpinan, Auditee (auditor func) ── */}
-              <Route element={<ProtectedRoute allowedRoles={['super_admin', 'kepala_lpmpp', 'pimpinan', 'auditee']} />}>
+              {/* ── Standar: Super Admin, Kepala LPMPP, Pimpinan, Auditee (auditor func), Auditor ── */}
+              <Route element={<ProtectedRoute allowedRoles={['super_admin', 'kepala_lpmpp', 'pimpinan', 'auditee', 'auditor']} />}>
                 <Route path="/standards" element={<StandardManagement />} />
               </Route>
 

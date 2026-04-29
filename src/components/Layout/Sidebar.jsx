@@ -90,7 +90,20 @@ const menuConfig = {
     },
   ],
 
-  auditor: [], // Auditor bukan role navigasi — fungsi via is_auditor flag
+  auditor: [
+    {
+      group: null,
+      items: [
+        { label: 'Dashboard', to: '/dashboard', icon: LayoutDashboard },
+      ],
+    },
+    {
+      group: 'Referensi',
+      items: [
+        { label: 'Standar', to: '/standards', icon: BookOpen },
+      ],
+    },
+  ],
 
   pimpinan: [
     {

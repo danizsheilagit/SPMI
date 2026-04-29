@@ -1,6 +1,6 @@
 /**
  * Admin — Manajemen Pengguna
- * Role utama: super_admin, kepala_lpmpp, pimpinan, auditee
+ * Role utama: super_admin, kepala_lpmpp, pimpinan, auditee, auditor
  * Fungsi tambahan: is_auditor (bisa diaktifkan untuk siapa saja)
  */
 import { useEffect, useState } from 'react'
@@ -11,24 +11,27 @@ import {
 import { supabase } from '../../lib/supabase'
 import { SkeletonTable } from '../../components/UI/Skeleton'
 
-/* ─── Konstanta role UTAMA (bukan auditor) ─────────────────── */
+/* ─── Konstanta role ────────────────────────────────────────── */
 const ROLE_LABELS = {
   super_admin:  'Super Admin',
   kepala_lpmpp: 'Kepala LPMPP',
   pimpinan:     'Pimpinan',
   auditee:      'Auditee',
+  auditor:      'Auditor',
 }
 const ROLE_COLORS = {
   super_admin:  'bg-purple-100 text-purple-700',
   kepala_lpmpp: 'bg-teal-100   text-teal-700',
   pimpinan:     'bg-amber-100  text-amber-700',
   auditee:      'bg-blue-100   text-blue-700',
+  auditor:      'bg-orange-100 text-orange-700',
 }
 const ROLE_ICONS = {
   super_admin:  ShieldCheck,
   kepala_lpmpp: Award,
   pimpinan:     Users,
   auditee:      UserCog,
+  auditor:      Mic2,
 }
 
 export default function UserManagement() {
@@ -70,11 +73,13 @@ export default function UserManagement() {
 
   function openEdit(user) {
     setEditTarget(user)
+    const role = user.role || 'auditee'
     setEditForm({
-      role:       user.role      || 'auditee',
+      role,
       unit_id:    user.unit_id   || '',
       full_name:  user.full_name || '',
-      is_auditor: user.is_auditor ?? false,
+      // Jika role = auditor, is_auditor selalu true
+      is_auditor: role === 'auditor' ? true : (user.is_auditor ?? false),
     })
   }
 
@@ -296,7 +301,9 @@ export default function UserManagement() {
                         onClick={() => setEditForm(f => ({
                           ...f,
                           role: value,
-                          unit_id: value !== 'auditee' ? '' : f.unit_id,
+                          // Auditor: hapus unit, auto-aktifkan is_auditor
+                          unit_id:    value !== 'auditee' ? '' : f.unit_id,
+                          is_auditor: value === 'auditor' ? true : f.is_auditor,
                         }))}
                         className={`flex items-center gap-2 rounded-md border px-3 py-2 text-sm font-medium transition-colors ${
                           editForm.role === value
@@ -334,16 +341,22 @@ export default function UserManagement() {
               )}
 
               {/* ── Fungsi Auditor ─────────────────────────────── */}
+              {/* Toggle dikunci jika role utama = auditor */}
               <div className={`rounded-lg border-2 px-4 py-3 transition-colors ${
                 editForm.is_auditor ? 'border-green-400 bg-green-50' : 'border-gray-200 bg-gray-50'
               }`}>
-                <label className="flex items-center gap-3 cursor-pointer select-none">
-                  {/* Toggle switch */}
+                <label className={`flex items-center gap-3 select-none ${
+                  editForm.role === 'auditor' ? 'cursor-default' : 'cursor-pointer'
+                }`}>
                   <div
-                    onClick={() => setEditForm(f => ({ ...f, is_auditor: !f.is_auditor }))}
+                    onClick={() => {
+                      if (editForm.role !== 'auditor') {
+                        setEditForm(f => ({ ...f, is_auditor: !f.is_auditor }))
+                      }
+                    }}
                     className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors ${
                       editForm.is_auditor ? 'bg-green-500' : 'bg-gray-300'
-                    }`}
+                    } ${editForm.role !== 'auditor' ? 'cursor-pointer' : ''}`}
                   >
                     <span className={`inline-block h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${
                       editForm.is_auditor ? 'translate-x-6' : 'translate-x-1'
@@ -356,7 +369,9 @@ export default function UserManagement() {
                       {editForm.is_auditor && <span className="ml-2 text-xs font-normal">✓ Aktif</span>}
                     </p>
                     <p className="text-xs text-gray-500 mt-0.5">
-                      Pengguna ini dapat ditugaskan sebagai auditor saat plotting
+                      {editForm.role === 'auditor'
+                        ? 'Otomatis aktif — role utama adalah Auditor'
+                        : 'Pengguna ini dapat ditugaskan sebagai auditor saat plotting'}
                     </p>
                   </div>
                 </label>
