@@ -118,12 +118,9 @@ export default function RTMDetail() {
         const rubric = finding.rubric_results
         const comps  = compsByInstrument[instrument.id] || []
 
-        // Hanya komponen yang punya temuan bukan 'sesuai'
+        // Semua komponen yang sudah diaudit (ada di rubric_results), termasuk 'sesuai'
         const relevantComps = comps
-          .filter(c => {
-            const cat = rubric[c.id]?.category
-            return cat && cat !== 'sesuai'
-          })
+          .filter(c => rubric[c.id]?.category != null)
           .map(c => ({
             comp:       c,
             finding,
