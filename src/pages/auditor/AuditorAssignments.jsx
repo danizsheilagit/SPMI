@@ -191,13 +191,13 @@ export default function AuditorAssignments() {
           <div className="divide-y divide-gray-100">
             {filtered.map(a => {
               const status = a.submission?.status ?? 'draft'
-              const auditable = canAudit(a.submission)
+              const viewable = canViewOrAudit(a.submission)
 
               return (
                 <div
                   key={a.id}
                   className={`grid grid-cols-[auto_1fr_1fr_1fr_auto] gap-4 items-center px-5 py-4 transition-colors ${
-                    auditable ? 'hover:bg-blue-50/40' : 'hover:bg-gray-50'
+                    viewable ? 'hover:bg-blue-50/40' : 'hover:bg-gray-50'
                   }`}
                 >
                   {/* Readiness icon */}
