@@ -153,7 +153,7 @@ export default function Sidebar({ collapsed = false }) {
   // Grup menu dari role
   let groups = menuConfig[role] || []
 
-  // Auditee + fungsi auditor → tambah Standar + Penugasan Audit
+  // Auditee + fungsi auditor → tambah Standar + Penugasan Audit + Verifikasi RTL
   if (role === 'auditee' && isAuditorFunc) {
     groups = groups.map(g =>
       g.group === 'Evaluasi'
@@ -166,7 +166,10 @@ export default function Sidebar({ collapsed = false }) {
         ...groups,
         {
           group: 'Audit',
-          items: [{ label: 'Penugasan Audit', to: '/auditor/assignments', icon: ClipboardCheck }],
+          items: [
+            { label: 'Penugasan Audit', to: '/auditor/assignments', icon: ClipboardCheck },
+            { label: 'Verifikasi RTL',  to: '/rtl-verification',    icon: ClipboardList  },
+          ],
         },
       ]
     }
