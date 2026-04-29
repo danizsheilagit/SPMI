@@ -17,6 +17,7 @@ $$;
 -- ── 1. Fix submissions SELECT ─────────────────────────────────
 -- Auditor (role/flag) bisa baca submissions dari unit yang ditugaskan
 DROP POLICY IF EXISTS "submissions: auditee read own unit" ON public.submissions;
+DROP POLICY IF EXISTS "submissions: read access" ON public.submissions;
 
 CREATE POLICY "submissions: read access" ON public.submissions
   FOR SELECT USING (
@@ -45,6 +46,7 @@ CREATE POLICY "submissions: read access" ON public.submissions
 -- ── 2. Fix submissions UPDATE ──────────────────────────────────
 -- Auditor bisa update status (under_review, verified)
 DROP POLICY IF EXISTS "submissions: auditee update own unit" ON public.submissions;
+DROP POLICY IF EXISTS "submissions: update access" ON public.submissions;
 
 CREATE POLICY "submissions: update access" ON public.submissions
   FOR UPDATE
@@ -96,6 +98,7 @@ CREATE POLICY "submissions: update access" ON public.submissions
 
 -- ── 3. Fix audit_findings — izinkan is_auditor flag ───────────
 DROP POLICY IF EXISTS "findings: write auditor or super_admin" ON public.audit_findings;
+DROP POLICY IF EXISTS "findings: read authenticated" ON public.audit_findings;
 
 CREATE POLICY "findings: write auditor or super_admin" ON public.audit_findings
   FOR ALL USING (
