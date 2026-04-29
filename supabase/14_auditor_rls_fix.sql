@@ -47,9 +47,11 @@ CREATE POLICY "submissions: read access" ON public.submissions
 DROP POLICY IF EXISTS "submissions: auditee update own unit" ON public.submissions;
 
 CREATE POLICY "submissions: update access" ON public.submissions
-  FOR UPDATE USING (
+  FOR UPDATE
+  -- USING: cek row LAMA (siapa yang boleh trigger update)
+  USING (
     public.current_user_role() = 'super_admin'
-    -- Auditor bisa update status submission yang ditugaskan
+    -- Auditor: boleh update submission yang ditugaskan ke mereka
     OR (
       (public.current_user_role() = 'auditor' OR public.current_user_is_auditor())
       AND EXISTS (
@@ -58,10 +60,32 @@ CREATE POLICY "submissions: update access" ON public.submissions
           AND uia.auditor_id = auth.uid()
       )
     )
-    -- Auditee update draft/revision_needed unit sendiri
+    -- Auditee: hanya bisa update saat status masih draft atau revision_needed
     OR (
       public.current_user_role() = 'auditee'
       AND status IN ('draft', 'revision_needed')
+      AND EXISTS (
+        SELECT 1 FROM public.unit_instruments ui
+        WHERE ui.id = submissions.unit_instrument_id
+          AND ui.unit_id = public.current_user_unit()
+      )
+    )
+  )
+  -- WITH CHECK: cek row BARU (nilai apa yang boleh disimpan)
+  WITH CHECK (
+    public.current_user_role() = 'super_admin'
+    -- Auditor: bebas set status apa pun pada submission yang ditugaskan
+    OR (
+      (public.current_user_role() = 'auditor' OR public.current_user_is_auditor())
+      AND EXISTS (
+        SELECT 1 FROM public.unit_instrument_auditors uia
+        WHERE uia.unit_instrument_id = submissions.unit_instrument_id
+          AND uia.auditor_id = auth.uid()
+      )
+    )
+    -- Auditee: boleh set status apa pun (termasuk 'submitted') untuk unit sendiri
+    OR (
+      public.current_user_role() = 'auditee'
       AND EXISTS (
         SELECT 1 FROM public.unit_instruments ui
         WHERE ui.id = submissions.unit_instrument_id
