@@ -102,7 +102,8 @@ const menuConfig = {
     {
       group: 'Audit',
       items: [
-        { label: 'Penugasan Audit', to: '/auditor/assignments', icon: ClipboardCheck },
+        { label: 'Penugasan Audit', to: '/auditor/assignments',  icon: ClipboardCheck },
+        { label: 'Verifikasi RTL',  to: '/rtl-verification',     icon: ClipboardList  },
       ],
     },
     {
