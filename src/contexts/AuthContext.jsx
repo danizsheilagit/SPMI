@@ -23,10 +23,10 @@ export function AuthProvider({ children }) {
           setProfile(prev => {
             const base = buildMetaProfile(session.user)
             if (prev?.role) {
-              // Sudah punya role asli — hanya update nama/avatar, jangan reset role
-              return { ...base, role: prev.role, unit_id: prev.unit_id, unit_name: prev.unit_name }
+              // Sudah punya role asli — hanya update nama/avatar, jangan reset role/is_auditor
+              return { ...base, role: prev.role, unit_id: prev.unit_id, unit_name: prev.unit_name, is_auditor: prev.is_auditor }
             }
-            return base  // belum ada role → mulai dari metadata
+            return base  // belum ada role → mulai dari metadata (dengan localStorage cache)
           })
 
           // Phase 2: fetch role dari DB
@@ -43,6 +43,8 @@ export function AuthProvider({ children }) {
 
   function buildMetaProfile(authUser) {
     const meta = authUser.user_metadata ?? {}
+    // Baca cache is_auditor dari localStorage agar siap sebelum DB response
+    const cachedIsAuditor = localStorage.getItem(`qasys_is_auditor_${authUser.id}`) === 'true'
     return {
       id:         authUser.id,
       email:      authUser.email,
@@ -51,6 +53,7 @@ export function AuthProvider({ children }) {
       role:       null,
       unit_id:    null,
       unit_name:  null,
+      is_auditor: cachedIsAuditor,
     }
   }
 
@@ -83,6 +86,14 @@ export function AuthProvider({ children }) {
         console.warn('[Auth] Profile RPC error:', error.message)
       } else if (data) {
         console.log('[Auth] Profile OK:', data.role, '/', data.full_name)
+        // Cache is_auditor di localStorage agar refresh berikutnya langsung tahu
+        if (data.id) {
+          if (data.is_auditor) {
+            localStorage.setItem(`qasys_is_auditor_${data.id}`, 'true')
+          } else {
+            localStorage.removeItem(`qasys_is_auditor_${data.id}`)
+          }
+        }
         setProfile(data)  // override dengan data lengkap dari DB
       }
     } catch (err) {
