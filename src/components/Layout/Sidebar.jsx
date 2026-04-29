@@ -13,6 +13,7 @@ import {
   Users,
   Building2,
   UserSearch,
+  BookOpen,
   ChevronRight,
 } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
@@ -23,23 +24,31 @@ const menuConfig = {
     { label: 'Dashboard',           to: '/dashboard',         icon: LayoutDashboard },
     { label: 'Siklus Audit',        to: '/audit-cycles',      icon: ClipboardList },
     { label: 'Instrumen',           to: '/instruments',       icon: FileText },
+    { label: 'Standar',             to: '/standards',         icon: BookOpen },
     { label: 'Unit & Prodi',        to: '/units',             icon: Building2 },
     { label: 'Plotting Auditor',    to: '/auditor-plotting',  icon: UserSearch },
     { label: 'Manajemen Pengguna',  to: '/users',             icon: Users },
     { label: 'Laporan & Rekap',     to: '/reports',           icon: BarChart3 },
     { label: 'Pengaturan',          to: '/settings',          icon: Settings },
   ],
-  auditee: [
-    { label: 'Dashboard', to: '/dashboard', icon: LayoutDashboard },
-    { label: 'Evaluasi Diri', to: '/self-evaluation', icon: ClipboardList },
-    { label: 'Rencana Tindak Lanjut', to: '/rtl', icon: FileText },
-    { label: 'Riwayat Audit', to: '/history', icon: BarChart3 },
+  kepala_lpmpp: [
+    { label: 'Dashboard',  to: '/dashboard',  icon: LayoutDashboard },
+    { label: 'Instrumen',  to: '/instruments', icon: FileText },
+    { label: 'Standar',    to: '/standards',   icon: BookOpen },
+    { label: 'Laporan & Rekap', to: '/reports', icon: BarChart3 },
   ],
-  auditor: [],   // Auditor bukan role navigasi — fungsi via is_auditor flag
+  auditee: [
+    { label: 'Dashboard',            to: '/dashboard',       icon: LayoutDashboard },
+    { label: 'Evaluasi Diri',        to: '/self-evaluation', icon: ClipboardList },
+    { label: 'Rencana Tindak Lanjut', to: '/rtl',            icon: FileText },
+    { label: 'Riwayat Audit',        to: '/history',         icon: BarChart3 },
+  ],
+  auditor: [],
   pimpinan: [
-    { label: 'Dashboard',       to: '/dashboard',    icon: LayoutDashboard },
-    { label: 'Instrumen',       to: '/instruments',  icon: FileText },
-    { label: 'Ringkasan Mutu',  to: '/summary',      icon: BarChart3 },
+    { label: 'Dashboard',       to: '/dashboard',     icon: LayoutDashboard },
+    { label: 'Instrumen',       to: '/instruments',   icon: FileText },
+    { label: 'Standar',         to: '/standards',     icon: BookOpen },
+    { label: 'Ringkasan Mutu',  to: '/summary',       icon: BarChart3 },
     { label: 'Laporan Audit',   to: '/audit-reports', icon: FileText },
   ],
 }
@@ -53,9 +62,22 @@ const roleLabels = {
 }
 
 export default function Sidebar({ collapsed = false }) {
-  const { profile, role, signOut } = useAuth()
+  const { profile, role, isAuditorFunc, signOut } = useAuth()
   const location = useLocation()
-  const menuItems = menuConfig[role] || []
+
+  // Menu dasar dari role
+  let menuItems = menuConfig[role] || []
+
+  // Jika auditee & punya fungsi auditor — tambahkan Standar
+  if (role === 'auditee' && isAuditorFunc) {
+    const alreadyHas = menuItems.some(m => m.to === '/standards')
+    if (!alreadyHas) {
+      menuItems = [
+        ...menuItems,
+        { label: 'Standar', to: '/standards', icon: BookOpen },
+      ]
+    }
+  }
 
   return (
     <aside

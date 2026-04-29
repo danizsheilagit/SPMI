@@ -119,11 +119,12 @@ export function AuthProvider({ children }) {
     signInWithGoogle,
     signOut,
     isAuthenticated: !!user,
-    role:         profile?.role ?? null,
-    isSuperAdmin: profile?.role === 'super_admin',
-    isAuditee:    profile?.role === 'auditee',
-    isAuditor:    profile?.role === 'auditor',
-    isPimpinan:   profile?.role === 'pimpinan',
+    role:           profile?.role ?? null,
+    isSuperAdmin:   profile?.role === 'super_admin',
+    isAuditee:      profile?.role === 'auditee',
+    isPimpinan:     profile?.role === 'pimpinan',
+    isKepalaLpmpp:  profile?.role === 'kepala_lpmpp',
+    isAuditorFunc:  profile?.is_auditor ?? false,  // fungsi auditor (bukan role)
   }
 
   return (

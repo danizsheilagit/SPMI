@@ -10,11 +10,12 @@ import Dashboard from './pages/Dashboard'
 import Unauthorized from './pages/Unauthorized'
 
 // Admin pages
-import AuditCycles         from './pages/admin/AuditCycles'
+import AuditCycles          from './pages/admin/AuditCycles'
 import InstrumentManagement from './pages/admin/InstrumentManagement'
-import UnitManagement      from './pages/admin/UnitManagement'
-import UserManagement      from './pages/admin/UserManagement'
-import AuditorPlotting     from './pages/admin/AuditorPlotting'
+import UnitManagement       from './pages/admin/UnitManagement'
+import UserManagement       from './pages/admin/UserManagement'
+import AuditorPlotting      from './pages/admin/AuditorPlotting'
+import StandardManagement   from './pages/admin/StandardManagement'
 
 // Auditee pages
 import SelfEvaluation from './pages/auditee/SelfEvaluation'
@@ -45,9 +46,14 @@ export default function App() {
                 <Route path="/settings"         element={<PlaceholderPage title="Pengaturan Sistem" />} />
               </Route>
 
-              {/* ── Super Admin + Pimpinan ─────────────── */}
+              {/* ── Super Admin + Pimpinan + Kepala LPMPP ── */}
               <Route element={<ProtectedRoute allowedRoles={['super_admin', 'pimpinan', 'kepala_lpmpp']} />}>
-                <Route path="/instruments"   element={<InstrumentManagement />} />
+                <Route path="/instruments" element={<InstrumentManagement />} />
+              </Route>
+
+              {/* ── Standar: Super Admin, Kepala LPMPP, Pimpinan, Auditee (auditor func) ── */}
+              <Route element={<ProtectedRoute allowedRoles={['super_admin', 'kepala_lpmpp', 'pimpinan', 'auditee']} />}>
+                <Route path="/standards" element={<StandardManagement />} />
               </Route>
 
               {/* ── Auditee only ───────────────────────── */}
