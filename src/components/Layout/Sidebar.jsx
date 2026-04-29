@@ -1,12 +1,11 @@
 /**
  * QASYS Sidebar Navigation
- * Cloudflare-inspired dark sidebar with role-aware menu items
+ * Grouped menu sections per role for better structure
  */
 import { NavLink, useLocation } from 'react-router-dom'
 import {
   LayoutDashboard,
   ClipboardList,
-  Search,
   FileText,
   BarChart3,
   Settings,
@@ -18,65 +17,127 @@ import {
 } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 
-// Menu items per role
+/* ─── Menu Config (dikelompokkan per seksi) ─────────────────── */
 const menuConfig = {
   super_admin: [
-    { label: 'Dashboard',           to: '/dashboard',         icon: LayoutDashboard },
-    { label: 'Siklus Audit',        to: '/audit-cycles',      icon: ClipboardList },
-    { label: 'Instrumen',           to: '/instruments',       icon: FileText },
-    { label: 'Standar',             to: '/standards',         icon: BookOpen },
-    { label: 'Unit & Prodi',        to: '/units',             icon: Building2 },
-    { label: 'Plotting Auditor',    to: '/auditor-plotting',  icon: UserSearch },
-    { label: 'Manajemen Pengguna',  to: '/users',             icon: Users },
-    { label: 'Laporan & Rekap',     to: '/reports',           icon: BarChart3 },
-    { label: 'Pengaturan',          to: '/settings',          icon: Settings },
+    {
+      group: null,
+      items: [
+        { label: 'Dashboard', to: '/dashboard', icon: LayoutDashboard },
+      ],
+    },
+    {
+      group: 'Mutu & Audit',
+      items: [
+        { label: 'Siklus Audit',     to: '/audit-cycles',     icon: ClipboardList },
+        { label: 'Instrumen',        to: '/instruments',      icon: FileText },
+        { label: 'Standar',          to: '/standards',        icon: BookOpen },
+        { label: 'Unit & Prodi',     to: '/units',            icon: Building2 },
+        { label: 'Plotting Auditor', to: '/auditor-plotting', icon: UserSearch },
+      ],
+    },
+    {
+      group: 'Administrasi',
+      items: [
+        { label: 'Manajemen Pengguna', to: '/users',    icon: Users },
+        { label: 'Laporan & Rekap',    to: '/reports',  icon: BarChart3 },
+        { label: 'Pengaturan',         to: '/settings', icon: Settings },
+      ],
+    },
   ],
+
   kepala_lpmpp: [
-    { label: 'Dashboard',  to: '/dashboard',  icon: LayoutDashboard },
-    { label: 'Instrumen',  to: '/instruments', icon: FileText },
-    { label: 'Standar',    to: '/standards',   icon: BookOpen },
-    { label: 'Laporan & Rekap', to: '/reports', icon: BarChart3 },
+    {
+      group: null,
+      items: [
+        { label: 'Dashboard', to: '/dashboard', icon: LayoutDashboard },
+      ],
+    },
+    {
+      group: 'Referensi',
+      items: [
+        { label: 'Instrumen', to: '/instruments', icon: FileText },
+        { label: 'Standar',   to: '/standards',   icon: BookOpen },
+      ],
+    },
+    {
+      group: 'Laporan',
+      items: [
+        { label: 'Laporan & Rekap', to: '/reports', icon: BarChart3 },
+      ],
+    },
   ],
+
   auditee: [
-    { label: 'Dashboard',            to: '/dashboard',       icon: LayoutDashboard },
-    { label: 'Evaluasi Diri',        to: '/self-evaluation', icon: ClipboardList },
-    { label: 'Rencana Tindak Lanjut', to: '/rtl',            icon: FileText },
-    { label: 'Riwayat Audit',        to: '/history',         icon: BarChart3 },
+    {
+      group: null,
+      items: [
+        { label: 'Dashboard', to: '/dashboard', icon: LayoutDashboard },
+      ],
+    },
+    {
+      group: 'Evaluasi',
+      items: [
+        { label: 'Evaluasi Diri',          to: '/self-evaluation', icon: ClipboardList },
+        { label: 'Rencana Tindak Lanjut',  to: '/rtl',             icon: FileText },
+      ],
+    },
+    {
+      group: 'Riwayat',
+      items: [
+        { label: 'Riwayat Audit', to: '/history', icon: BarChart3 },
+      ],
+    },
   ],
-  auditor: [],
+
+  auditor: [], // Auditor bukan role navigasi — fungsi via is_auditor flag
+
   pimpinan: [
-    { label: 'Dashboard',       to: '/dashboard',     icon: LayoutDashboard },
-    { label: 'Instrumen',       to: '/instruments',   icon: FileText },
-    { label: 'Standar',         to: '/standards',     icon: BookOpen },
-    { label: 'Ringkasan Mutu',  to: '/summary',       icon: BarChart3 },
-    { label: 'Laporan Audit',   to: '/audit-reports', icon: FileText },
+    {
+      group: null,
+      items: [
+        { label: 'Dashboard', to: '/dashboard', icon: LayoutDashboard },
+      ],
+    },
+    {
+      group: 'Referensi',
+      items: [
+        { label: 'Instrumen', to: '/instruments', icon: FileText },
+        { label: 'Standar',   to: '/standards',   icon: BookOpen },
+      ],
+    },
+    {
+      group: 'Laporan',
+      items: [
+        { label: 'Ringkasan Mutu', to: '/summary',       icon: BarChart3 },
+        { label: 'Laporan Audit',  to: '/audit-reports', icon: FileText },
+      ],
+    },
   ],
 }
 
 const roleLabels = {
   super_admin:  'Super Admin',
   kepala_lpmpp: 'Kepala LPMPP',
-  auditee: 'Auditee',
-  auditor: 'Auditor',
-  pimpinan: 'Pimpinan',
+  auditee:      'Auditee',
+  pimpinan:     'Pimpinan',
 }
 
+/* ─── Sidebar ───────────────────────────────────────────────── */
 export default function Sidebar({ collapsed = false }) {
   const { profile, role, isAuditorFunc, signOut } = useAuth()
   const location = useLocation()
 
-  // Menu dasar dari role
-  let menuItems = menuConfig[role] || []
+  // Grup menu dari role
+  let groups = menuConfig[role] || []
 
-  // Jika auditee & punya fungsi auditor — tambahkan Standar
+  // Auditee + fungsi auditor → tambah Standar ke grup Evaluasi
   if (role === 'auditee' && isAuditorFunc) {
-    const alreadyHas = menuItems.some(m => m.to === '/standards')
-    if (!alreadyHas) {
-      menuItems = [
-        ...menuItems,
-        { label: 'Standar', to: '/standards', icon: BookOpen },
-      ]
-    }
+    groups = groups.map(g =>
+      g.group === 'Evaluasi'
+        ? { ...g, items: [...g.items, { label: 'Standar', to: '/standards', icon: BookOpen }] }
+        : g
+    )
   }
 
   return (
@@ -85,7 +146,7 @@ export default function Sidebar({ collapsed = false }) {
         collapsed ? 'w-16' : 'w-64'
       } min-h-screen`}
     >
-      {/* Logo / Brand */}
+      {/* ── Logo / Brand ──────────────────────────────────── */}
       <div className="flex items-center gap-3 px-4 py-4 border-b border-gray-800">
         <img
           src="/logo-sys.png"
@@ -100,7 +161,7 @@ export default function Sidebar({ collapsed = false }) {
         )}
       </div>
 
-      {/* Role Badge */}
+      {/* ── Role Badge ────────────────────────────────────── */}
       {!collapsed && role && (
         <div className="mx-3 mt-3 mb-1 px-3 py-1.5 rounded bg-blue-900/40 border border-blue-800/60">
           <p className="text-[11px] text-blue-300 font-medium">{roleLabels[role] ?? role}</p>
@@ -108,47 +169,62 @@ export default function Sidebar({ collapsed = false }) {
         </div>
       )}
 
-      {/* Navigation */}
-      <nav className="flex-1 px-2 py-3 space-y-0.5 overflow-y-auto">
-        {menuItems.map((item) => {
-          const Icon = item.icon
-          const isActive = location.pathname === item.to ||
-            location.pathname.startsWith(item.to + '/')
+      {/* ── Navigation ────────────────────────────────────── */}
+      <nav className="flex-1 px-2 py-3 overflow-y-auto space-y-4">
+        {groups.map((group, gi) => (
+          <div key={gi}>
+            {/* Group label */}
+            {group.group && !collapsed && (
+              <p className="px-3 mb-1 text-[10px] font-semibold uppercase tracking-widest text-gray-500">
+                {group.group}
+              </p>
+            )}
+            {group.group && collapsed && (
+              <div className="my-1 border-t border-gray-800/60" />
+            )}
 
-          return (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              className={`
-                flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium
-                transition-colors duration-150 group
-                ${isActive
-                  ? 'bg-blue-600 text-white'
-                  : 'text-gray-400 hover:text-white hover:bg-gray-800'
-                }
-              `}
-            >
-              <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-white' : 'text-gray-500 group-hover:text-gray-300'}`} />
-              {!collapsed && (
-                <>
-                  <span className="flex-1 truncate">{item.label}</span>
-                  {isActive && <ChevronRight className="w-3.5 h-3.5 text-blue-200" />}
-                </>
-              )}
-            </NavLink>
-          )
-        })}
+            {/* Items */}
+            <div className="space-y-0.5">
+              {(group.items || []).map(item => {
+                const Icon = item.icon
+                const isActive =
+                  location.pathname === item.to ||
+                  location.pathname.startsWith(item.to + '/')
+
+                return (
+                  <NavLink
+                    key={item.to}
+                    to={item.to}
+                    className={`
+                      flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium
+                      transition-colors duration-150 group
+                      ${isActive
+                        ? 'bg-blue-600 text-white'
+                        : 'text-gray-400 hover:text-white hover:bg-gray-800'
+                      }
+                    `}
+                  >
+                    <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-white' : 'text-gray-500 group-hover:text-gray-300'}`} />
+                    {!collapsed && (
+                      <>
+                        <span className="flex-1 truncate">{item.label}</span>
+                        {isActive && <ChevronRight className="w-3.5 h-3.5 text-blue-200" />}
+                      </>
+                    )}
+                  </NavLink>
+                )
+              })}
+            </div>
+          </div>
+        ))}
       </nav>
 
-      {/* Sign Out */}
+      {/* ── Sign Out ──────────────────────────────────────── */}
       <div className="px-2 pb-4 border-t border-gray-800 pt-3">
         <button
           onClick={signOut}
-          className={`
-            w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm
-            text-gray-400 hover:text-white hover:bg-gray-800
-            transition-colors duration-150
-          `}
+          className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm
+            text-gray-400 hover:text-white hover:bg-gray-800 transition-colors duration-150"
         >
           <svg className="w-4 h-4 shrink-0 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
