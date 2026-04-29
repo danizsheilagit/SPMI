@@ -122,7 +122,7 @@ export default function UserManagement() {
   const auditorCount = users.filter(u => u.is_auditor).length
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6">
+    <div className="max-w-5xl space-y-6">
 
       {/* ── Header ────────────────────────────────────────────── */}
       <div>

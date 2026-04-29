@@ -275,7 +275,7 @@ export default function StandardManagement() {
   }, {})
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
+    <div className="max-w-6xl space-y-6">
 
       {/* ── Header ──────────────────────────────────────────── */}
       <div className="flex flex-wrap items-start justify-between gap-4">

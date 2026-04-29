@@ -231,7 +231,7 @@ export default function AuditorPlotting() {
   const pending         = pendingCount()
 
   return (
-    <div className="max-w-6xl mx-auto space-y-5">
+    <div className="max-w-6xl space-y-5">
 
       {/* ── Header ──────────────────────────────────────────── */}
       <div className="flex flex-wrap items-start justify-between gap-4">

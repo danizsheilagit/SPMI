@@ -147,7 +147,7 @@ export default function InstrumentManagement() {
   if (loading) return <SkeletonGrid cols={1} rows={4} />
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6">
+    <div className="max-w-5xl space-y-6">
       <div>
         <h1 className="text-xl font-bold text-gray-900">Manajemen Instrumen</h1>
         <p className="text-sm text-gray-500 mt-0.5">Upload PDF instrumen dan kelola butir penilaian PPEPP</p>

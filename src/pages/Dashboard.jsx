@@ -120,7 +120,7 @@ export default function Dashboard() {
   if (loading) return <SkeletonDashboard />
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
+    <div className="max-w-6xl space-y-6">
 
       {/* ── Welcome banner ────────────────────────────────── */}
       <div className="rounded-md bg-gradient-to-r from-blue-600 to-indigo-600 p-6 text-white shadow-sm">
