@@ -57,22 +57,20 @@ export default function RTMDetail() {
       if (e1) throw e1
       setRtm(rtmData)
 
-      // 2. Load audit_findings dalam siklus ini (semua unit yang verified)
-      const { data: findings, error: e2 } = await supabase
-        .from('audit_findings')
+      // 2. Query unit_instruments untuk siklus ini (bukan audit_findings langsung)
+      //    Filter cycle_id di level yang benar agar PostgREST bekerja
+      const { data: uis, error: e2 } = await supabase
+        .from('unit_instruments')
         .select(`
-          id, category, rubric_results, summary,
-          submissions (
+          id,
+          units      ( id, name, code, assigned_pimpinan_id ),
+          instruments( id, code, name ),
+          submissions(
             id, status,
-            unit_instruments (
-              id,
-              units ( id, name, code, assigned_pimpinan_id ),
-              instruments ( id, code, name ),
-              audit_cycles ( id )
-            )
+            audit_findings ( id, rubric_results, category )
           )
         `)
-        .eq('submissions.unit_instruments.audit_cycles.id', rtmData.cycle_id)
+        .eq('cycle_id', rtmData.cycle_id)
       if (e2) throw e2
 
       // 3. Load existing rtm_findings untuk RTM ini
@@ -86,11 +84,9 @@ export default function RTMDetail() {
         rtmFindingMap[`${rf.unit_id}_${rf.component_id}`] = rf
       }
 
-      // 4. Load instrument_components untuk tiap instrumen
+      // 4. Kumpulkan instrument_ids yang dibutuhkan
       const instrumentIds = [...new Set(
-        (findings || [])
-          .map(f => f.submissions?.unit_instruments?.instruments?.id)
-          .filter(Boolean)
+        (uis || []).map(ui => ui.instruments?.id).filter(Boolean)
       )]
       const { data: components } = await supabase
         .from('instrument_components')
@@ -104,22 +100,25 @@ export default function RTMDetail() {
         compsByInstrument[c.instrument_id].push(c)
       }
 
-      // 5. Build unit groups (filter: hanya scope pimpinan yang login)
+      // 5. Build unit groups dari unit_instruments
       const groups = []
-      for (const f of findings || []) {
-        const ui = f.submissions?.unit_instruments
-        if (!ui) continue
+      for (const ui of uis || []) {
         const unit       = ui.units
         const instrument = ui.instruments
         if (!unit || !instrument) continue
 
-        // Filter: hanya unit yang assigned ke pimpinan ini
+        // Filter: hanya unit dalam scope pimpinan yang login
         if (unit.assigned_pimpinan_id !== user.id) continue
 
-        const rubric = f.rubric_results || {}
+        // Ambil audit_finding dari submission
+        const sub     = ui.submissions?.[0]
+        const finding = sub?.audit_findings?.[0]
+        if (!finding?.rubric_results) continue  // skip jika belum ada desk evaluasi
+
+        const rubric = finding.rubric_results
         const comps  = compsByInstrument[instrument.id] || []
 
-        // Hanya tampilkan komponen yang punya temuan bukan 'sesuai'
+        // Hanya komponen yang punya temuan bukan 'sesuai'
         const relevantComps = comps
           .filter(c => {
             const cat = rubric[c.id]?.category
@@ -127,7 +126,7 @@ export default function RTMDetail() {
           })
           .map(c => ({
             comp:       c,
-            finding:    f,
+            finding,
             deskScore:  rubric[c.id]?.desk_score,
             category:   rubric[c.id]?.category,
             catatan:    rubric[c.id]?.catatan,
@@ -136,14 +135,8 @@ export default function RTMDetail() {
 
         if (relevantComps.length === 0) continue
 
-        // Merge jika unit sudah ada
-        const existing = groups.find(g => g.unit.id === unit.id && g.instrument.id === instrument.id)
-        if (existing) {
-          existing.components.push(...relevantComps)
-        } else {
-          groups.push({ unit, instrument, finding: f, components: relevantComps })
-          setExpanded(e => ({ ...e, [unit.id]: true }))
-        }
+        groups.push({ unit, instrument, finding, components: relevantComps })
+        setExpanded(e => ({ ...e, [unit.id]: true }))
       }
 
       setUnitGroups(groups)
@@ -153,6 +146,7 @@ export default function RTMDetail() {
       setLoading(false)
     }
   }
+
 
   function selectComponent(item) {
     setSelected(item)
@@ -287,10 +281,15 @@ export default function RTMDetail() {
             </p>
           </div>
           {unitGroups.length === 0 ? (
-            <div className="p-6 text-center">
-              <ClipboardList className="h-8 w-8 text-gray-300 mx-auto mb-2" />
-              <p className="text-sm text-gray-400">Tidak ada temuan pada unit yang Anda supervisi</p>
-              <p className="text-xs text-gray-400 mt-1">Pastikan unit sudah di-assign ke Anda di UnitManagement.</p>
+            <div className="p-6 text-center space-y-3">
+              <ClipboardList className="h-8 w-8 text-gray-300 mx-auto" />
+              <p className="text-sm font-medium text-gray-500">Belum ada temuan untuk ditinjau</p>
+              <div className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-left text-xs text-amber-700 space-y-1">
+                <p className="font-semibold">Syarat agar temuan muncul di sini:</p>
+                <p>1️⃣ Unit sudah di-assign ke Anda di <strong>Unit &amp; Prodi</strong></p>
+                <p>2️⃣ Auditee unit tersebut sudah <strong>Submit Evaluasi Diri</strong></p>
+                <p>3️⃣ Auditor sudah selesai <strong>Desk Evaluasi</strong> dan submit temuan</p>
+              </div>
             </div>
           ) : (
             <div className="p-2 space-y-2">
