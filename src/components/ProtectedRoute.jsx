@@ -1,12 +1,13 @@
 /**
  * RBAC Route Guard
  * Wraps routes that require authentication and specific roles.
+ * allowAuditorFunc: also grants access to any user with isAuditorFunc=true
  */
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 
-export default function ProtectedRoute({ allowedRoles = [] }) {
-  const { isAuthenticated, role, loading } = useAuth()
+export default function ProtectedRoute({ allowedRoles = [], allowAuditorFunc = false }) {
+  const { isAuthenticated, role, isAuditorFunc, loading } = useAuth()
   const location = useLocation()
 
   // Show full-page spinner ONLY while auth is being determined
@@ -27,14 +28,16 @@ export default function ProtectedRoute({ allowedRoles = [] }) {
   }
 
   // No role requirement → just auth check (outer wrapper)
-  if (allowedRoles.length === 0) return <Outlet />
+  if (allowedRoles.length === 0 && !allowAuditorFunc) return <Outlet />
 
   // Role not loaded yet (profile fetch still pending/failed) → render anyway
-  // Individual pages can show role-appropriate content
   if (!role) return <Outlet />
 
-  // Wrong role → unauthorized
-  if (!allowedRoles.includes(role)) {
+  // Check access: role match OR auditor function flag
+  const roleAllowed    = allowedRoles.length > 0 && allowedRoles.includes(role)
+  const auditorAllowed = allowAuditorFunc && isAuditorFunc
+
+  if (!roleAllowed && !auditorAllowed) {
     return <Navigate to="/unauthorized" replace />
   }
 

@@ -6,6 +6,7 @@ import { NavLink, useLocation } from 'react-router-dom'
 import {
   LayoutDashboard,
   ClipboardList,
+  ClipboardCheck,
   FileText,
   BarChart3,
   Settings,
@@ -98,6 +99,12 @@ const menuConfig = {
       ],
     },
     {
+      group: 'Audit',
+      items: [
+        { label: 'Penugasan Audit', to: '/auditor/assignments', icon: ClipboardCheck },
+      ],
+    },
+    {
       group: 'Referensi',
       items: [
         { label: 'Standar', to: '/standards', icon: BookOpen },
@@ -144,13 +151,23 @@ export default function Sidebar({ collapsed = false }) {
   // Grup menu dari role
   let groups = menuConfig[role] || []
 
-  // Auditee + fungsi auditor → tambah Standar ke grup Evaluasi
+  // Auditee + fungsi auditor → tambah Standar + Penugasan Audit
   if (role === 'auditee' && isAuditorFunc) {
     groups = groups.map(g =>
       g.group === 'Evaluasi'
         ? { ...g, items: [...g.items, { label: 'Standar', to: '/standards', icon: BookOpen }] }
         : g
     )
+    // Tambah grup Audit jika belum ada
+    if (!groups.some(g => g.group === 'Audit')) {
+      groups = [
+        ...groups,
+        {
+          group: 'Audit',
+          items: [{ label: 'Penugasan Audit', to: '/auditor/assignments', icon: ClipboardCheck }],
+        },
+      ]
+    }
   }
 
   return (

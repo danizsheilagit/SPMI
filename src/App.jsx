@@ -21,6 +21,10 @@ import StandardManagement   from './pages/admin/StandardManagement'
 import SelfEvaluation from './pages/auditee/SelfEvaluation'
 import EvaluationForm from './pages/auditee/EvaluationForm'
 
+// Auditor pages
+import AuditorAssignments from './pages/auditor/AuditorAssignments'
+import AuditorAuditDetail from './pages/auditor/AuditorAuditDetail'
+
 export default function App() {
   return (
     <BrowserRouter>
@@ -64,11 +68,10 @@ export default function App() {
                 <Route path="/history"                           element={<PlaceholderPage title="Riwayat Audit" />} />
               </Route>
 
-              {/* ── Auditor only ───────────────────────── */}
-              <Route element={<ProtectedRoute allowedRoles={['auditor']} />}>
-                <Route path="/assignments"   element={<PlaceholderPage title="Penugasan Audit" />} />
-                <Route path="/findings"      element={<PlaceholderPage title="Temuan Audit" />} />
-                <Route path="/audit-reports" element={<PlaceholderPage title="Laporan Audit" />} />
+              {/* ── Auditor: role=auditor OR is_auditor flag ── */}
+              <Route element={<ProtectedRoute allowedRoles={['auditor']} allowAuditorFunc />}>
+                <Route path="/auditor/assignments"            element={<AuditorAssignments />} />
+                <Route path="/auditor/audit/:unitInstrumentId" element={<AuditorAuditDetail />} />
               </Route>
 
               {/* ── Pimpinan only ──────────────────────── */}
