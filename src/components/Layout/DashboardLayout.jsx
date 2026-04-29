@@ -19,7 +19,7 @@ function LayoutInner() {
           onToggleSidebar={() => setSidebarCollapsed(c => !c)}
           breadcrumbs={breadcrumbs}
         />
-        <main className="flex-1 pt-6 pr-6 pb-6 pl-1.5 overflow-auto">
+        <main className="flex-1 pt-6 pr-6 pb-6 pl-16 overflow-auto">
           <Outlet />
         </main>
       </div>
