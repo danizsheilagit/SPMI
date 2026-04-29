@@ -185,7 +185,7 @@ export default function Sidebar({ collapsed = false }) {
       {/* ── Navigation ────────────────────────────────────── */}
       <nav className="flex-1 px-2 py-3 overflow-y-auto">
         {groups.map((group, gi) => (
-          <div key={gi} className={gi === 0 ? '' : 'mt-5'}>
+          <div key={gi} className={gi === 0 ? '' : 'mt-3'}>
             {/* Group label */}
             {group.group && !collapsed && (
               <p className="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-widest text-gray-500">
