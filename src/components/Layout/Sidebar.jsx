@@ -183,17 +183,17 @@ export default function Sidebar({ collapsed = false }) {
       )}
 
       {/* ── Navigation ────────────────────────────────────── */}
-      <nav className="flex-1 px-2 py-3 overflow-y-auto space-y-4">
+      <nav className="flex-1 px-2 py-3 overflow-y-auto">
         {groups.map((group, gi) => (
-          <div key={gi}>
+          <div key={gi} className={gi === 0 ? '' : 'mt-5'}>
             {/* Group label */}
             {group.group && !collapsed && (
-              <p className="px-3 mb-1 text-[10px] font-semibold uppercase tracking-widest text-gray-500">
+              <p className="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-widest text-gray-500">
                 {group.group}
               </p>
             )}
             {group.group && collapsed && (
-              <div className="my-1 border-t border-gray-800/60" />
+              <div className="my-2 border-t border-gray-800/60" />
             )}
 
             {/* Items */}
