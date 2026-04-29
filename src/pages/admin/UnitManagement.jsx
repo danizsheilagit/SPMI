@@ -3,7 +3,7 @@
  * CRUD units + assign instruments per unit per cycle.
  */
 import { useEffect, useState, useCallback } from 'react'
-import { Plus, Building2, Link2, Loader2, X, AlertCircle, Check, Pencil, Trash2 } from 'lucide-react'
+import { Plus, Building2, Link2, Loader2, X, AlertCircle, Check, Pencil, Trash2, UserCheck } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { SkeletonGrid } from '../../components/UI/Skeleton'
 
@@ -11,6 +11,8 @@ export default function UnitManagement() {
   const [units, setUnits] = useState([])
   const [instruments, setInstruments] = useState([])
   const [cycles, setCycles] = useState([])
+  const [pimpinanUsers, setPimpinanUsers] = useState([])  // daftar user role=pimpinan
+  const [assigningPimpinan, setAssigningPimpinan] = useState(null) // unitId sedang disimpan
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
@@ -36,14 +38,16 @@ export default function UnitManagement() {
     setLoading(true)
     setError(null)
     try {
-      const [u, i, c] = await Promise.allSettled([
-        supabase.from('units').select('*').eq('is_active', true).order('name'),
+      const [u, i, c, p] = await Promise.allSettled([
+        supabase.from('units').select('*, profiles:assigned_pimpinan_id(id, full_name)').eq('is_active', true).order('name'),
         supabase.from('instruments').select('id, code, name').eq('is_active', true).order('code'),
         supabase.from('audit_cycles').select('id, name, academic_year, semester, is_active').order('created_at', { ascending: false }),
+        supabase.from('profiles').select('id, full_name').eq('role', 'pimpinan').order('full_name'),
       ])
 
       if (u.status === 'fulfilled') setUnits(u.value.data || [])
       if (i.status === 'fulfilled') setInstruments(i.value.data || [])
+      if (p.status === 'fulfilled') setPimpinanUsers(p.value.data || [])
       if (c.status === 'fulfilled') {
         const cycles = c.value.data || []
         setCycles(cycles)
@@ -150,6 +154,27 @@ export default function UnitManagement() {
     loadAll()
   }
 
+  async function handleAssignPimpinan(unitId, pimpinanId) {
+    setAssigningPimpinan(unitId)
+    try {
+      const { error: e } = await supabase
+        .from('units')
+        .update({ assigned_pimpinan_id: pimpinanId || null })
+        .eq('id', unitId)
+      if (e) throw e
+      // Update local state
+      setUnits(prev => prev.map(u => {
+        if (u.id !== unitId) return u
+        const pimpinan = pimpinanUsers.find(p => p.id === pimpinanId)
+        return { ...u, assigned_pimpinan_id: pimpinanId || null, profiles: pimpinan || null }
+      }))
+    } catch (err) {
+      alert('Gagal assign pimpinan: ' + err.message)
+    } finally {
+      setAssigningPimpinan(null)
+    }
+  }
+
   const currentCycleName = cycles.find(c => c.id === selectedCycle)?.name ?? ''
 
   return (
@@ -226,10 +251,30 @@ export default function UnitManagement() {
                   </button>
                 </div>
               </div>
+
+              {/* Assign Pimpinan — inline dropdown */}
+              <div className="mt-3 flex items-center gap-2">
+                <UserCheck className="h-3.5 w-3.5 text-gray-400 shrink-0" />
+                <select
+                  value={unit.assigned_pimpinan_id ?? ''}
+                  onChange={e => handleAssignPimpinan(unit.id, e.target.value)}
+                  disabled={assigningPimpinan === unit.id || pimpinanUsers.length === 0}
+                  className="flex-1 rounded border border-gray-200 px-2 py-1 text-xs text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-400 disabled:opacity-60 bg-gray-50"
+                >
+                  <option value="">— Belum ada Pimpinan —</option>
+                  {pimpinanUsers.map(p => (
+                    <option key={p.id} value={p.id}>{p.full_name}</option>
+                  ))}
+                </select>
+                {assigningPimpinan === unit.id && (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin text-blue-500 shrink-0" />
+                )}
+              </div>
+
               <button
                 onClick={() => openAssign(unit)}
                 disabled={cycles.length === 0}
-                className="mt-3 w-full inline-flex items-center justify-center gap-1.5 rounded border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-50 hover:border-blue-300 hover:text-blue-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                className="mt-2 w-full inline-flex items-center justify-center gap-1.5 rounded border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-50 hover:border-blue-300 hover:text-blue-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 <Link2 className="h-3.5 w-3.5" /> Tugaskan Instrumen
               </button>
