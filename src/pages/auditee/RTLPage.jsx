@@ -193,7 +193,7 @@ export default function RTLPage() {
       const { data: rtmFindings, error: e1 } = await supabase
         .from('rtm_findings')
         .select(`
-          id, keputusan, batas_waktu, component_id,
+          id, keputusan, batas_waktu, component_id, unit_id,
           instrument_id,
           rtm_sessions ( id, title, is_published, held_at, audit_cycles(id, name) ),
           instrument_components ( id, code, name )
