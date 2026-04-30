@@ -33,22 +33,41 @@ const menuConfig = {
       items: [
         { label: 'Siklus Audit',     to: '/audit-cycles',     icon: ClipboardList },
         { label: 'Instrumen',        to: '/instruments',      icon: FileText },
-        { label: 'Standar',          to: '/standards',        icon: BookOpen },
         { label: 'Unit & Prodi',     to: '/units',            icon: Building2 },
         { label: 'Plotting Auditor', to: '/auditor-plotting', icon: UserSearch },
       ],
     },
     {
+      group: 'Dokumen SPMI',
+      items: [
+        { label: 'Kebijakan SPMI',    to: '/dokumen/kebijakan',    icon: BookOpen },
+        { label: 'Manual/Pedoman',    to: '/dokumen/manual',       icon: BookOpen },
+        { label: 'Standar SPMI',      to: '/dokumen/standar-spmi', icon: BookOpen },
+        { label: 'Instrumen SPMI',    to: '/dokumen/instrumen',    icon: FileText },
+        { label: 'SOP',               to: '/dokumen/sop',          icon: FileText },
+      ],
+    },
+    {
+      group: 'Dokumen Pendukung',
+      items: [
+        { label: 'Pendidikan',  to: '/dokumen/pendidikan',  icon: FileText },
+        { label: 'Penelitian',  to: '/dokumen/penelitian',  icon: FileText },
+        { label: 'Pengabdian',  to: '/dokumen/pengabdian',  icon: FileText },
+        { label: 'Non SN-Dikti', to: '/dokumen/non-sndikti', icon: FileText },
+      ],
+    },
+    {
       group: 'Administrasi',
       items: [
-        { label: 'Manajemen Pengguna', to: '/users',              icon: Users        },
+        { label: 'Manajemen Pengguna', to: '/users',               icon: Users        },
         { label: 'Pengumuman',         to: '/announcements/manage', icon: Megaphone   },
-        { label: 'Verifikasi RTL',     to: '/rtl-verification',   icon: ClipboardCheck },
-        { label: 'Laporan & Rekap',    to: '/reports',            icon: BarChart3    },
-        { label: 'Pengaturan',         to: '/settings',           icon: Settings     },
+        { label: 'Verifikasi RTL',     to: '/rtl-verification',    icon: ClipboardCheck },
+        { label: 'Laporan & Rekap',    to: '/reports',             icon: BarChart3    },
+        { label: 'Pengaturan',         to: '/settings',            icon: Settings     },
       ],
     },
   ],
+
 
   kepala_lpmpp: [
     {
@@ -58,20 +77,34 @@ const menuConfig = {
       ],
     },
     {
-      group: 'Referensi',
+      group: 'Dokumen SPMI',
       items: [
-        { label: 'Instrumen', to: '/instruments', icon: FileText },
-        { label: 'Standar',   to: '/standards',   icon: BookOpen },
+        { label: 'Kebijakan SPMI',  to: '/dokumen/kebijakan',    icon: BookOpen },
+        { label: 'Manual/Pedoman',  to: '/dokumen/manual',       icon: BookOpen },
+        { label: 'Standar SPMI',    to: '/dokumen/standar-spmi', icon: BookOpen },
+        { label: 'Instrumen SPMI',  to: '/dokumen/instrumen',    icon: FileText },
+        { label: 'SOP',             to: '/dokumen/sop',          icon: FileText },
+      ],
+    },
+    {
+      group: 'Dokumen Pendukung',
+      items: [
+        { label: 'Pendidikan',   to: '/dokumen/pendidikan',  icon: FileText },
+        { label: 'Penelitian',   to: '/dokumen/penelitian',  icon: FileText },
+        { label: 'Pengabdian',   to: '/dokumen/pengabdian',  icon: FileText },
+        { label: 'Non SN-Dikti', to: '/dokumen/non-sndikti', icon: FileText },
       ],
     },
     {
       group: 'Administrasi',
       items: [
-        { label: 'Pengumuman',      to: '/announcements/manage', icon: Megaphone },
-        { label: 'Laporan & Rekap', to: '/reports',              icon: BarChart3 },
+        { label: 'Instrumen AMI',   to: '/instruments',            icon: ClipboardList },
+        { label: 'Pengumuman',      to: '/announcements/manage',   icon: Megaphone },
+        { label: 'Laporan & Rekap', to: '/reports',                icon: BarChart3 },
       ],
     },
   ],
+
 
   auditee: [
     {
@@ -83,8 +116,27 @@ const menuConfig = {
     {
       group: 'Evaluasi',
       items: [
-        { label: 'Evaluasi Diri',          to: '/self-evaluation', icon: ClipboardList },
-        { label: 'Rencana Tindak Lanjut',  to: '/rtl',             icon: FileText      },
+        { label: 'Evaluasi Diri',         to: '/self-evaluation', icon: ClipboardList },
+        { label: 'Rencana Tindak Lanjut', to: '/rtl',             icon: FileText      },
+      ],
+    },
+    {
+      group: 'Dokumen SPMI',
+      items: [
+        { label: 'Kebijakan SPMI',  to: '/dokumen/kebijakan',    icon: BookOpen },
+        { label: 'Manual/Pedoman',  to: '/dokumen/manual',       icon: BookOpen },
+        { label: 'Standar SPMI',    to: '/dokumen/standar-spmi', icon: BookOpen },
+        { label: 'Instrumen SPMI',  to: '/dokumen/instrumen',    icon: FileText },
+        { label: 'SOP',             to: '/dokumen/sop',          icon: FileText },
+      ],
+    },
+    {
+      group: 'Dokumen Pendukung',
+      items: [
+        { label: 'Pendidikan',   to: '/dokumen/pendidikan',  icon: FileText },
+        { label: 'Penelitian',   to: '/dokumen/penelitian',  icon: FileText },
+        { label: 'Pengabdian',   to: '/dokumen/pengabdian',  icon: FileText },
+        { label: 'Non SN-Dikti', to: '/dokumen/non-sndikti', icon: FileText },
       ],
     },
     {
@@ -96,6 +148,7 @@ const menuConfig = {
     },
   ],
 
+
   auditor: [
     {
       group: null,
@@ -106,18 +159,37 @@ const menuConfig = {
     {
       group: 'Audit',
       items: [
-        { label: 'Penugasan Audit', to: '/auditor/assignments',  icon: ClipboardCheck },
-        { label: 'Verifikasi RTL',  to: '/rtl-verification',     icon: ClipboardList  },
+        { label: 'Penugasan Audit', to: '/auditor/assignments', icon: ClipboardCheck },
+        { label: 'Verifikasi RTL',  to: '/rtl-verification',    icon: ClipboardList  },
+      ],
+    },
+    {
+      group: 'Dokumen SPMI',
+      items: [
+        { label: 'Kebijakan SPMI',  to: '/dokumen/kebijakan',    icon: BookOpen },
+        { label: 'Manual/Pedoman',  to: '/dokumen/manual',       icon: BookOpen },
+        { label: 'Standar SPMI',    to: '/dokumen/standar-spmi', icon: BookOpen },
+        { label: 'Instrumen SPMI',  to: '/dokumen/instrumen',    icon: FileText },
+        { label: 'SOP',             to: '/dokumen/sop',          icon: FileText },
+      ],
+    },
+    {
+      group: 'Dokumen Pendukung',
+      items: [
+        { label: 'Pendidikan',   to: '/dokumen/pendidikan',  icon: FileText },
+        { label: 'Penelitian',   to: '/dokumen/penelitian',  icon: FileText },
+        { label: 'Pengabdian',   to: '/dokumen/pengabdian',  icon: FileText },
+        { label: 'Non SN-Dikti', to: '/dokumen/non-sndikti', icon: FileText },
       ],
     },
     {
       group: 'Informasi',
       items: [
         { label: 'Pengumuman', to: '/announcements', icon: Megaphone },
-        { label: 'Standar',    to: '/standards',     icon: BookOpen  },
       ],
     },
   ],
+
 
   pimpinan: [
     {
@@ -134,13 +206,26 @@ const menuConfig = {
       ],
     },
     {
-      group: 'Referensi',
+      group: 'Dokumen SPMI',
       items: [
-        { label: 'Instrumen', to: '/instruments', icon: FileText },
-        { label: 'Standar',   to: '/standards',   icon: BookOpen },
+        { label: 'Kebijakan SPMI',  to: '/dokumen/kebijakan',    icon: BookOpen },
+        { label: 'Manual/Pedoman',  to: '/dokumen/manual',       icon: BookOpen },
+        { label: 'Standar SPMI',    to: '/dokumen/standar-spmi', icon: BookOpen },
+        { label: 'Instrumen SPMI',  to: '/dokumen/instrumen',    icon: FileText },
+        { label: 'SOP',             to: '/dokumen/sop',          icon: FileText },
+      ],
+    },
+    {
+      group: 'Dokumen Pendukung',
+      items: [
+        { label: 'Pendidikan',   to: '/dokumen/pendidikan',  icon: FileText },
+        { label: 'Penelitian',   to: '/dokumen/penelitian',  icon: FileText },
+        { label: 'Pengabdian',   to: '/dokumen/pengabdian',  icon: FileText },
+        { label: 'Non SN-Dikti', to: '/dokumen/non-sndikti', icon: FileText },
       ],
     },
   ],
+
 }
 
 const roleLabels = {

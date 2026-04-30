@@ -40,6 +40,9 @@ import RTLPage from './pages/auditee/RTLPage'
 import AnnouncementManagement from './pages/admin/AnnouncementManagement'
 import AnnouncementsPage      from './pages/shared/AnnouncementsPage'
 
+// Dokumen SPMI
+import DocumentLibraryPage from './pages/shared/DocumentLibraryPage'
+
 export default function App() {
   return (
     <BrowserRouter>
@@ -111,9 +114,22 @@ export default function App() {
                 <Route path="/announcements" element={<AnnouncementsPage />} />
               </Route>
 
-              {/* ── Super Admin + Auditor: Verifikasi RTL ──────── */}
+              {/* ── Super Admin + Auditor: Verifikasi RTL ──────────── */}
               <Route element={<ProtectedRoute allowedRoles={['super_admin', 'auditor']} allowAuditorFunc />}>
                 <Route path="/rtl-verification" element={<RTLVerification />} />
+              </Route>
+
+              {/* ── Dokumen SPMI (semua authenticated) ──────────── */}
+              <Route element={<ProtectedRoute allowedRoles={['super_admin','kepala_lpmpp','pimpinan','auditor','auditee']} allowAuditorFunc />}>
+                <Route path="/dokumen/kebijakan"   element={<DocumentLibraryPage docType="kebijakan"   title="Kebijakan SPMI"       description="Dokumen kebijakan sistem penjaminan mutu internal" />} />
+                <Route path="/dokumen/manual"      element={<DocumentLibraryPage docType="manual"      title="Manual / Pedoman SPMI" description="Panduan dan pedoman pelaksanaan SPMI" />} />
+                <Route path="/dokumen/standar-spmi" element={<DocumentLibraryPage docType="standar_spmi" title="Standar SPMI"        description="Dokumen standar mutu internal institusi" />} />
+                <Route path="/dokumen/instrumen"   element={<DocumentLibraryPage docType="instrumen_spmi" title="Instrumen SPMI"    description="Formulir dan instrumen audit mutu internal" />} />
+                <Route path="/dokumen/sop"         element={<DocumentLibraryPage docType="sop"         title="SOP"                 description="Standard Operating Procedure kegiatan SPMI" />} />
+                <Route path="/dokumen/pendidikan"  element={<DocumentLibraryPage docType="pendidikan"  title="Dokumen Pendidikan"  description="Dokumen pendukung bidang pendidikan" />} />
+                <Route path="/dokumen/penelitian"  element={<DocumentLibraryPage docType="penelitian"  title="Dokumen Penelitian"  description="Dokumen pendukung bidang penelitian" />} />
+                <Route path="/dokumen/pengabdian"  element={<DocumentLibraryPage docType="pengabdian"  title="Dokumen Pengabdian"  description="Dokumen pendukung bidang pengabdian masyarakat" />} />
+                <Route path="/dokumen/non-sndikti" element={<DocumentLibraryPage docType="non_sndikti" title="Non SN-Dikti"        description="Dokumen regulasi dan standar di luar SN-Dikti" />} />
               </Route>
             </Route>
 
