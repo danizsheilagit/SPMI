@@ -15,6 +15,7 @@ import {
   UserSearch,
   BookOpen,
   ChevronRight,
+  Megaphone,
 } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 
@@ -40,10 +41,11 @@ const menuConfig = {
     {
       group: 'Administrasi',
       items: [
-        { label: 'Manajemen Pengguna', to: '/users',              icon: Users     },
+        { label: 'Manajemen Pengguna', to: '/users',              icon: Users        },
+        { label: 'Pengumuman',         to: '/announcements/manage', icon: Megaphone   },
         { label: 'Verifikasi RTL',     to: '/rtl-verification',   icon: ClipboardCheck },
-        { label: 'Laporan & Rekap',    to: '/reports',            icon: BarChart3 },
-        { label: 'Pengaturan',         to: '/settings',           icon: Settings  },
+        { label: 'Laporan & Rekap',    to: '/reports',            icon: BarChart3    },
+        { label: 'Pengaturan',         to: '/settings',           icon: Settings     },
       ],
     },
   ],
@@ -63,9 +65,10 @@ const menuConfig = {
       ],
     },
     {
-      group: 'Laporan',
+      group: 'Administrasi',
       items: [
-        { label: 'Laporan & Rekap', to: '/reports', icon: BarChart3 },
+        { label: 'Pengumuman',      to: '/announcements/manage', icon: Megaphone },
+        { label: 'Laporan & Rekap', to: '/reports',              icon: BarChart3 },
       ],
     },
   ],
@@ -81,13 +84,14 @@ const menuConfig = {
       group: 'Evaluasi',
       items: [
         { label: 'Evaluasi Diri',          to: '/self-evaluation', icon: ClipboardList },
-        { label: 'Rencana Tindak Lanjut',  to: '/rtl',             icon: FileText },
+        { label: 'Rencana Tindak Lanjut',  to: '/rtl',             icon: FileText      },
       ],
     },
     {
-      group: 'Riwayat',
+      group: 'Informasi',
       items: [
-        { label: 'Riwayat Audit', to: '/history', icon: BarChart3 },
+        { label: 'Pengumuman',   to: '/announcements', icon: Megaphone },
+        { label: 'Riwayat Audit', to: '/history',      icon: BarChart3 },
       ],
     },
   ],
@@ -107,9 +111,10 @@ const menuConfig = {
       ],
     },
     {
-      group: 'Referensi',
+      group: 'Informasi',
       items: [
-        { label: 'Standar', to: '/standards', icon: BookOpen },
+        { label: 'Pengumuman', to: '/announcements', icon: Megaphone },
+        { label: 'Standar',    to: '/standards',     icon: BookOpen  },
       ],
     },
   ],

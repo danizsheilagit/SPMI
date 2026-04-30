@@ -36,6 +36,10 @@ import Reports         from './pages/admin/Reports'
 // Auditee pages (RTL)
 import RTLPage from './pages/auditee/RTLPage'
 
+// Announcements
+import AnnouncementManagement from './pages/admin/AnnouncementManagement'
+import AnnouncementsPage      from './pages/shared/AnnouncementsPage'
+
 export default function App() {
   return (
     <BrowserRouter>
@@ -95,6 +99,16 @@ export default function App() {
               {/* ── Super Admin + Kepala LPMPP + Pimpinan ──────── */}
               <Route element={<ProtectedRoute allowedRoles={['super_admin', 'kepala_lpmpp', 'pimpinan']} />}>
                 <Route path="/reports" element={<Reports />} />
+              </Route>
+
+              {/* ── Super Admin + Kepala LPMPP: Announcements ── */}
+              <Route element={<ProtectedRoute allowedRoles={['super_admin', 'kepala_lpmpp']} />}>
+                <Route path="/announcements/manage" element={<AnnouncementManagement />} />
+              </Route>
+
+              {/* ── Auditor + Auditee: Lihat Pengumuman ─────── */}
+              <Route element={<ProtectedRoute allowedRoles={['auditor', 'auditee', 'pimpinan']} allowAuditorFunc />}>
+                <Route path="/announcements" element={<AnnouncementsPage />} />
               </Route>
 
               {/* ── Super Admin + Auditor: Verifikasi RTL ──────── */}
