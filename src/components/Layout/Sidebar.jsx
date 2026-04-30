@@ -142,11 +142,11 @@ const menuConfig = {
     {
       group: 'Informasi',
       items: [
-        { label: 'Pengumuman',   to: '/announcements', icon: Megaphone },
-        { label: 'Riwayat Audit', to: '/history',      icon: BarChart3 },
+        { label: 'Riwayat Audit', to: '/history', icon: BarChart3 },
       ],
     },
   ],
+
 
 
   auditor: [
@@ -180,12 +180,6 @@ const menuConfig = {
         { label: 'Penelitian',   to: '/dokumen/penelitian',  icon: FileText },
         { label: 'Pengabdian',   to: '/dokumen/pengabdian',  icon: FileText },
         { label: 'Non SN-Dikti', to: '/dokumen/non-sndikti', icon: FileText },
-      ],
-    },
-    {
-      group: 'Informasi',
-      items: [
-        { label: 'Pengumuman', to: '/announcements', icon: Megaphone },
       ],
     },
   ],

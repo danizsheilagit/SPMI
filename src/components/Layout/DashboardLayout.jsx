@@ -5,6 +5,7 @@ import { useState } from 'react'
 import { Outlet } from 'react-router-dom'
 import Sidebar from './Sidebar'
 import Header from './Header'
+import AnnouncementBanner from './AnnouncementBanner'
 import { BreadcrumbProvider, useCrumbs } from '../../contexts/BreadcrumbContext'
 
 function LayoutInner() {
@@ -19,6 +20,7 @@ function LayoutInner() {
           onToggleSidebar={() => setSidebarCollapsed(c => !c)}
           breadcrumbs={breadcrumbs}
         />
+        <AnnouncementBanner />
         <main className="flex-1 pt-6 pr-6 pb-6 pl-16 overflow-auto">
           <Outlet />
         </main>
