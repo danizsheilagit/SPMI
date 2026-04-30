@@ -95,7 +95,7 @@ export default function AnnouncementsPage() {
                   </a>
                 </div>
 
-                {/* iframe melalui Google Docs Viewer */}
+                {/* iframe PDF langsung (bucket public) */}
                 <div className="relative rounded-lg border border-gray-200 overflow-hidden bg-gray-100"
                   style={{ height: '55vh' }}>
                   {!pdfLoaded && !pdfError && (
@@ -107,17 +107,22 @@ export default function AnnouncementsPage() {
                   {pdfError ? (
                     <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 p-4">
                       <FileText className="h-10 w-10 text-gray-300" />
-                      <p className="text-sm text-gray-500 text-center">
-                        Dokumen tidak dapat ditampilkan di sini.
-                      </p>
-                      <a href={item.pdf_url} target="_blank" rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
-                        <ExternalLink className="h-3.5 w-3.5" /> Buka / Download PDF
-                      </a>
+                      <p className="text-sm text-gray-500 text-center">PDF tidak bisa tampil langsung.</p>
+                      <div className="flex flex-col sm:flex-row gap-2">
+                        <a href={`https://docs.google.com/viewer?url=${encodeURIComponent(item.pdf_url)}&embedded=true`}
+                          target="_blank" rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 rounded-md bg-blue-600 px-3 py-2 text-xs font-medium text-white hover:bg-blue-700">
+                          <ExternalLink className="h-3.5 w-3.5" /> Buka via Google Docs
+                        </a>
+                        <a href={item.pdf_url} target="_blank" rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 rounded-md border border-gray-300 bg-white px-3 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50">
+                          <ExternalLink className="h-3.5 w-3.5" /> Download PDF
+                        </a>
+                      </div>
                     </div>
                   ) : (
                     <iframe
-                      src={`https://docs.google.com/viewer?url=${encodeURIComponent(item.pdf_url)}&embedded=true`}
+                      src={item.pdf_url}
                       className="w-full h-full border-0"
                       title={item.pdf_name || 'Lampiran PDF'}
                       onLoad={() => setPdfLoaded(true)}
