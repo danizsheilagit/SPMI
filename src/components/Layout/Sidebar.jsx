@@ -136,7 +136,9 @@ export default function Sidebar({ collapsed = false }) {
   const location = useLocation()
 
   // collapsedGroups: set of group names yang di-hide
-  const [collapsedGroups, setCollapsedGroups] = useState(new Set())
+  const [collapsedGroups, setCollapsedGroups] = useState(
+    new Set(['Dokumen SPMI', 'Dokumen Pendukung'])
+  )
 
   function toggleGroup(groupName) {
     setCollapsedGroups(prev => {
