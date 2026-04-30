@@ -1,118 +1,85 @@
 /**
  * QASYS Sidebar Navigation
- * Grouped menu sections per role for better structure
+ * - Collapsible groups (klik header untuk hide/show)
+ * - Urutan: Dashboard → Dokumen SPMI → Dokumen Pendukung → menu lainnya
+ * - Collapsed mode (icon only) didukung penuh
  */
+import { useState } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import {
-  LayoutDashboard,
-  ClipboardList,
-  ClipboardCheck,
-  FileText,
-  BarChart3,
-  Settings,
-  Users,
-  Building2,
-  UserSearch,
-  BookOpen,
-  ChevronRight,
-  Megaphone,
+  LayoutDashboard, ClipboardList, ClipboardCheck, FileText,
+  BarChart3, Settings, Users, Building2, UserSearch, BookOpen,
+  ChevronRight, ChevronDown, Megaphone, FolderOpen, FolderClosed,
+  LogOut,
 } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 
-/* ─── Menu Config (dikelompokkan per seksi) ─────────────────── */
+/* ─── Shared sub-menus ───────────────────────────────────────── */
+const DOKUMEN_SPMI = {
+  group: 'Dokumen SPMI',
+  items: [
+    { label: 'Kebijakan SPMI', to: '/dokumen/kebijakan',    icon: BookOpen },
+    { label: 'Manual/Pedoman', to: '/dokumen/manual',       icon: BookOpen },
+    { label: 'Standar SPMI',   to: '/dokumen/standar-spmi', icon: BookOpen },
+    { label: 'Instrumen SPMI', to: '/dokumen/instrumen',    icon: FileText },
+    { label: 'SOP',            to: '/dokumen/sop',          icon: FileText },
+  ],
+}
+const DOKUMEN_PENDUKUNG = {
+  group: 'Dokumen Pendukung',
+  items: [
+    { label: 'Pendidikan',   to: '/dokumen/pendidikan',  icon: FileText },
+    { label: 'Penelitian',   to: '/dokumen/penelitian',  icon: FileText },
+    { label: 'Pengabdian',   to: '/dokumen/pengabdian',  icon: FileText },
+    { label: 'Non SN-Dikti', to: '/dokumen/non-sndikti', icon: FileText },
+  ],
+}
+
+/* ─── Menu Config (Dashboard → Dokumen → menu lainnya) ───────── */
 const menuConfig = {
   super_admin: [
-    {
-      group: null,
-      items: [
-        { label: 'Dashboard', to: '/dashboard', icon: LayoutDashboard },
-      ],
-    },
+    { group: null, items: [{ label: 'Dashboard', to: '/dashboard', icon: LayoutDashboard }] },
+    DOKUMEN_SPMI,
+    DOKUMEN_PENDUKUNG,
     {
       group: 'Mutu & Audit',
       items: [
         { label: 'Siklus Audit',     to: '/audit-cycles',     icon: ClipboardList },
-        { label: 'Instrumen',        to: '/instruments',      icon: FileText },
+        { label: 'Instrumen AMI',    to: '/instruments',      icon: FileText },
         { label: 'Unit & Prodi',     to: '/units',            icon: Building2 },
         { label: 'Plotting Auditor', to: '/auditor-plotting', icon: UserSearch },
       ],
     },
     {
-      group: 'Dokumen SPMI',
-      items: [
-        { label: 'Kebijakan SPMI',    to: '/dokumen/kebijakan',    icon: BookOpen },
-        { label: 'Manual/Pedoman',    to: '/dokumen/manual',       icon: BookOpen },
-        { label: 'Standar SPMI',      to: '/dokumen/standar-spmi', icon: BookOpen },
-        { label: 'Instrumen SPMI',    to: '/dokumen/instrumen',    icon: FileText },
-        { label: 'SOP',               to: '/dokumen/sop',          icon: FileText },
-      ],
-    },
-    {
-      group: 'Dokumen Pendukung',
-      items: [
-        { label: 'Pendidikan',  to: '/dokumen/pendidikan',  icon: FileText },
-        { label: 'Penelitian',  to: '/dokumen/penelitian',  icon: FileText },
-        { label: 'Pengabdian',  to: '/dokumen/pengabdian',  icon: FileText },
-        { label: 'Non SN-Dikti', to: '/dokumen/non-sndikti', icon: FileText },
-      ],
-    },
-    {
       group: 'Administrasi',
       items: [
-        { label: 'Manajemen Pengguna', to: '/users',               icon: Users        },
-        { label: 'Pengumuman',         to: '/announcements/manage', icon: Megaphone   },
-        { label: 'Verifikasi RTL',     to: '/rtl-verification',    icon: ClipboardCheck },
-        { label: 'Laporan & Rekap',    to: '/reports',             icon: BarChart3    },
-        { label: 'Pengaturan',         to: '/settings',            icon: Settings     },
+        { label: 'Manajemen Pengguna', to: '/users',                icon: Users         },
+        { label: 'Pengumuman',         to: '/announcements/manage', icon: Megaphone     },
+        { label: 'Verifikasi RTL',     to: '/rtl-verification',     icon: ClipboardCheck},
+        { label: 'Laporan & Rekap',    to: '/reports',              icon: BarChart3     },
+        { label: 'Pengaturan',         to: '/settings',             icon: Settings      },
       ],
     },
   ],
 
-
   kepala_lpmpp: [
-    {
-      group: null,
-      items: [
-        { label: 'Dashboard', to: '/dashboard', icon: LayoutDashboard },
-      ],
-    },
-    {
-      group: 'Dokumen SPMI',
-      items: [
-        { label: 'Kebijakan SPMI',  to: '/dokumen/kebijakan',    icon: BookOpen },
-        { label: 'Manual/Pedoman',  to: '/dokumen/manual',       icon: BookOpen },
-        { label: 'Standar SPMI',    to: '/dokumen/standar-spmi', icon: BookOpen },
-        { label: 'Instrumen SPMI',  to: '/dokumen/instrumen',    icon: FileText },
-        { label: 'SOP',             to: '/dokumen/sop',          icon: FileText },
-      ],
-    },
-    {
-      group: 'Dokumen Pendukung',
-      items: [
-        { label: 'Pendidikan',   to: '/dokumen/pendidikan',  icon: FileText },
-        { label: 'Penelitian',   to: '/dokumen/penelitian',  icon: FileText },
-        { label: 'Pengabdian',   to: '/dokumen/pengabdian',  icon: FileText },
-        { label: 'Non SN-Dikti', to: '/dokumen/non-sndikti', icon: FileText },
-      ],
-    },
+    { group: null, items: [{ label: 'Dashboard', to: '/dashboard', icon: LayoutDashboard }] },
+    DOKUMEN_SPMI,
+    DOKUMEN_PENDUKUNG,
     {
       group: 'Administrasi',
       items: [
         { label: 'Instrumen AMI',   to: '/instruments',            icon: ClipboardList },
-        { label: 'Pengumuman',      to: '/announcements/manage',   icon: Megaphone },
-        { label: 'Laporan & Rekap', to: '/reports',                icon: BarChart3 },
+        { label: 'Pengumuman',      to: '/announcements/manage',   icon: Megaphone     },
+        { label: 'Laporan & Rekap', to: '/reports',                icon: BarChart3     },
       ],
     },
   ],
 
-
   auditee: [
-    {
-      group: null,
-      items: [
-        { label: 'Dashboard', to: '/dashboard', icon: LayoutDashboard },
-      ],
-    },
+    { group: null, items: [{ label: 'Dashboard', to: '/dashboard', icon: LayoutDashboard }] },
+    DOKUMEN_SPMI,
+    DOKUMEN_PENDUKUNG,
     {
       group: 'Evaluasi',
       items: [
@@ -121,41 +88,17 @@ const menuConfig = {
       ],
     },
     {
-      group: 'Dokumen SPMI',
-      items: [
-        { label: 'Kebijakan SPMI',  to: '/dokumen/kebijakan',    icon: BookOpen },
-        { label: 'Manual/Pedoman',  to: '/dokumen/manual',       icon: BookOpen },
-        { label: 'Standar SPMI',    to: '/dokumen/standar-spmi', icon: BookOpen },
-        { label: 'Instrumen SPMI',  to: '/dokumen/instrumen',    icon: FileText },
-        { label: 'SOP',             to: '/dokumen/sop',          icon: FileText },
-      ],
-    },
-    {
-      group: 'Dokumen Pendukung',
-      items: [
-        { label: 'Pendidikan',   to: '/dokumen/pendidikan',  icon: FileText },
-        { label: 'Penelitian',   to: '/dokumen/penelitian',  icon: FileText },
-        { label: 'Pengabdian',   to: '/dokumen/pengabdian',  icon: FileText },
-        { label: 'Non SN-Dikti', to: '/dokumen/non-sndikti', icon: FileText },
-      ],
-    },
-    {
-      group: 'Informasi',
+      group: 'Riwayat',
       items: [
         { label: 'Riwayat Audit', to: '/history', icon: BarChart3 },
       ],
     },
   ],
 
-
-
   auditor: [
-    {
-      group: null,
-      items: [
-        { label: 'Dashboard', to: '/dashboard', icon: LayoutDashboard },
-      ],
-    },
+    { group: null, items: [{ label: 'Dashboard', to: '/dashboard', icon: LayoutDashboard }] },
+    DOKUMEN_SPMI,
+    DOKUMEN_PENDUKUNG,
     {
       group: 'Audit',
       items: [
@@ -163,35 +106,12 @@ const menuConfig = {
         { label: 'Verifikasi RTL',  to: '/rtl-verification',    icon: ClipboardList  },
       ],
     },
-    {
-      group: 'Dokumen SPMI',
-      items: [
-        { label: 'Kebijakan SPMI',  to: '/dokumen/kebijakan',    icon: BookOpen },
-        { label: 'Manual/Pedoman',  to: '/dokumen/manual',       icon: BookOpen },
-        { label: 'Standar SPMI',    to: '/dokumen/standar-spmi', icon: BookOpen },
-        { label: 'Instrumen SPMI',  to: '/dokumen/instrumen',    icon: FileText },
-        { label: 'SOP',             to: '/dokumen/sop',          icon: FileText },
-      ],
-    },
-    {
-      group: 'Dokumen Pendukung',
-      items: [
-        { label: 'Pendidikan',   to: '/dokumen/pendidikan',  icon: FileText },
-        { label: 'Penelitian',   to: '/dokumen/penelitian',  icon: FileText },
-        { label: 'Pengabdian',   to: '/dokumen/pengabdian',  icon: FileText },
-        { label: 'Non SN-Dikti', to: '/dokumen/non-sndikti', icon: FileText },
-      ],
-    },
   ],
 
-
   pimpinan: [
-    {
-      group: null,
-      items: [
-        { label: 'Dashboard', to: '/dashboard', icon: LayoutDashboard },
-      ],
-    },
+    { group: null, items: [{ label: 'Dashboard', to: '/dashboard', icon: LayoutDashboard }] },
+    DOKUMEN_SPMI,
+    DOKUMEN_PENDUKUNG,
     {
       group: 'AMI',
       items: [
@@ -199,33 +119,14 @@ const menuConfig = {
         { label: 'Laporan & Rekap',        to: '/reports', icon: BarChart3     },
       ],
     },
-    {
-      group: 'Dokumen SPMI',
-      items: [
-        { label: 'Kebijakan SPMI',  to: '/dokumen/kebijakan',    icon: BookOpen },
-        { label: 'Manual/Pedoman',  to: '/dokumen/manual',       icon: BookOpen },
-        { label: 'Standar SPMI',    to: '/dokumen/standar-spmi', icon: BookOpen },
-        { label: 'Instrumen SPMI',  to: '/dokumen/instrumen',    icon: FileText },
-        { label: 'SOP',             to: '/dokumen/sop',          icon: FileText },
-      ],
-    },
-    {
-      group: 'Dokumen Pendukung',
-      items: [
-        { label: 'Pendidikan',   to: '/dokumen/pendidikan',  icon: FileText },
-        { label: 'Penelitian',   to: '/dokumen/penelitian',  icon: FileText },
-        { label: 'Pengabdian',   to: '/dokumen/pengabdian',  icon: FileText },
-        { label: 'Non SN-Dikti', to: '/dokumen/non-sndikti', icon: FileText },
-      ],
-    },
   ],
-
 }
 
 const roleLabels = {
   super_admin:  'Super Admin',
   kepala_lpmpp: 'Kepala LPMPP',
   auditee:      'Auditee',
+  auditor:      'Auditor',
   pimpinan:     'Pimpinan',
 }
 
@@ -234,19 +135,21 @@ export default function Sidebar({ collapsed = false }) {
   const { profile, role, isAuditorFunc, signOut } = useAuth()
   const location = useLocation()
 
-  // Grup menu dari role
-  let groups = menuConfig[role] || []
+  // collapsedGroups: set of group names yang di-hide
+  const [collapsedGroups, setCollapsedGroups] = useState(new Set())
 
-  // Auditee + fungsi auditor → tambah Standar ke menu Evaluasi
-  if (role === 'auditee' && isAuditorFunc) {
-    groups = groups.map(g =>
-      g.group === 'Evaluasi'
-        ? { ...g, items: [...g.items, { label: 'Standar', to: '/standards', icon: BookOpen }] }
-        : g
-    )
+  function toggleGroup(groupName) {
+    setCollapsedGroups(prev => {
+      const next = new Set(prev)
+      next.has(groupName) ? next.delete(groupName) : next.add(groupName)
+      return next
+    })
   }
 
-  // Semua user dengan fungsi auditor → tampilkan menu Audit (Penugasan + Verifikasi RTL)
+  // Bangun menu dari role
+  let groups = menuConfig[role] || []
+
+  // Auditee yang juga auditor: tambah grup Audit
   if (isAuditorFunc && !groups.some(g => g.group === 'Audit')) {
     groups = [
       ...groups,
@@ -262,7 +165,7 @@ export default function Sidebar({ collapsed = false }) {
 
   return (
     <aside
-      className={`flex flex-col bg-gray-900 text-white transition-all duration-300 ${
+      className={`flex flex-col bg-gray-900 text-white transition-all duration-300 shrink-0 ${
         collapsed ? 'w-16' : 'w-64'
       } min-h-screen`}
     >
@@ -290,66 +193,106 @@ export default function Sidebar({ collapsed = false }) {
       )}
 
       {/* ── Navigation ────────────────────────────────────── */}
-      <nav className="flex-1 px-2 py-3 overflow-y-auto">
-        {groups.map((group, gi) => (
-          <div key={gi} className={gi === 0 ? '' : 'mt-3'}>
-            {/* Group label */}
-            {group.group && !collapsed && (
-              <p className="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-widest text-gray-500">
-                {group.group}
-              </p>
-            )}
-            {group.group && collapsed && (
-              <div className="my-2 border-t border-gray-800/60" />
-            )}
+      <nav className="flex-1 px-2 py-3 overflow-y-auto space-y-1 scrollbar-thin scrollbar-thumb-gray-700">
+        {groups.map((group, gi) => {
+          const isGroupCollapsed = group.group && collapsedGroups.has(group.group)
+          // Apakah ada item aktif di grup ini
+          const hasActiveItem = (group.items || []).some(
+            item => location.pathname === item.to || location.pathname.startsWith(item.to + '/')
+          )
 
-            {/* Items */}
-            <div className="space-y-0.5">
-              {(group.items || []).map(item => {
-                const Icon = item.icon
-                const isActive =
-                  location.pathname === item.to ||
-                  location.pathname.startsWith(item.to + '/')
+          return (
+            <div key={gi} className={gi === 0 ? '' : ''}>
 
-                return (
-                  <NavLink
-                    key={item.to}
-                    to={item.to}
-                    className={`
-                      flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium
-                      transition-colors duration-150 group
-                      ${isActive
-                        ? 'bg-blue-600 text-white'
-                        : 'text-gray-400 hover:text-white hover:bg-gray-800'
-                      }
-                    `}
-                  >
-                    <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-white' : 'text-gray-500 group-hover:text-gray-300'}`} />
-                    {!collapsed && (
-                      <>
-                        <span className="flex-1 truncate">{item.label}</span>
-                        {isActive && <ChevronRight className="w-3.5 h-3.5 text-blue-200" />}
-                      </>
-                    )}
-                  </NavLink>
-                )
-              })}
+              {/* ── Group header (collapsible) ── */}
+              {group.group && !collapsed && (
+                <button
+                  onClick={() => toggleGroup(group.group)}
+                  className={`w-full flex items-center justify-between px-3 py-1.5 rounded-md mb-0.5 transition-colors group
+                    ${hasActiveItem
+                      ? 'text-blue-400 hover:bg-gray-800'
+                      : 'text-gray-500 hover:text-gray-300 hover:bg-gray-800'
+                    }`}
+                >
+                  <div className="flex items-center gap-2">
+                    {group.group === 'Dokumen SPMI' || group.group === 'Dokumen Pendukung'
+                      ? (isGroupCollapsed
+                          ? <FolderClosed className="h-3 w-3" />
+                          : <FolderOpen className="h-3 w-3" />)
+                      : null
+                    }
+                    <span className="text-[10px] font-semibold uppercase tracking-widest">
+                      {group.group}
+                    </span>
+                  </div>
+                  <ChevronDown
+                    className={`h-3 w-3 transition-transform duration-200 ${
+                      isGroupCollapsed ? '-rotate-90' : 'rotate-0'
+                    }`}
+                  />
+                </button>
+              )}
+
+              {/* Collapsed sidebar: divider saja */}
+              {group.group && collapsed && (
+                <div className="my-2 border-t border-gray-800/60" />
+              )}
+
+              {/* ── Items ── */}
+              {!isGroupCollapsed && (
+                <div
+                  className={`space-y-0.5 overflow-hidden transition-all duration-200 ${
+                    group.group && !collapsed ? 'pl-1' : ''
+                  }`}
+                >
+                  {(group.items || []).map(item => {
+                    const Icon = item.icon
+                    const isActive =
+                      location.pathname === item.to ||
+                      location.pathname.startsWith(item.to + '/')
+
+                    return (
+                      <NavLink
+                        key={item.to}
+                        to={item.to}
+                        title={collapsed ? item.label : undefined}
+                        className={`
+                          flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium
+                          transition-colors duration-150 group
+                          ${isActive
+                            ? 'bg-blue-600 text-white'
+                            : 'text-gray-400 hover:text-white hover:bg-gray-800'
+                          }
+                        `}
+                      >
+                        <Icon className={`w-4 h-4 shrink-0 ${
+                          isActive ? 'text-white' : 'text-gray-500 group-hover:text-gray-300'
+                        }`} />
+                        {!collapsed && (
+                          <>
+                            <span className="flex-1 truncate">{item.label}</span>
+                            {isActive && <ChevronRight className="w-3.5 h-3.5 text-blue-200" />}
+                          </>
+                        )}
+                      </NavLink>
+                    )
+                  })}
+                </div>
+              )}
             </div>
-          </div>
-        ))}
+          )
+        })}
       </nav>
 
       {/* ── Sign Out ──────────────────────────────────────── */}
       <div className="px-2 pb-4 border-t border-gray-800 pt-3">
         <button
           onClick={signOut}
+          title={collapsed ? 'Keluar' : undefined}
           className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm
             text-gray-400 hover:text-white hover:bg-gray-800 transition-colors duration-150"
         >
-          <svg className="w-4 h-4 shrink-0 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1" />
-          </svg>
+          <LogOut className="w-4 h-4 shrink-0 text-gray-500" />
           {!collapsed && <span>Keluar</span>}
         </button>
       </div>
