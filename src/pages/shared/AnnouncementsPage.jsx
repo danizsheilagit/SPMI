@@ -81,7 +81,7 @@ export default function AnnouncementsPage() {
               </div>
             )}
 
-            {/* PDF Viewer via iframe */}
+            {/* PDF Viewer via Google Docs Viewer (bypass X-Frame-Options) */}
             {item.pdf_url && (
               <div className="px-5 py-4">
                 <div className="flex items-center justify-between mb-3">
@@ -91,39 +91,39 @@ export default function AnnouncementsPage() {
                   </p>
                   <a href={item.pdf_url} target="_blank" rel="noopener noreferrer"
                     className="text-xs text-blue-600 hover:underline flex items-center gap-1">
-                    <ExternalLink className="h-3.5 w-3.5" /> Buka di tab baru
+                    <ExternalLink className="h-3.5 w-3.5" /> Buka / Download
                   </a>
                 </div>
 
-                {/* iframe PDF */}
+                {/* iframe melalui Google Docs Viewer */}
                 <div className="relative rounded-lg border border-gray-200 overflow-hidden bg-gray-100"
                   style={{ height: '55vh' }}>
                   {!pdfLoaded && !pdfError && (
-                    <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="absolute inset-0 flex items-center justify-center z-10 bg-gray-100">
                       <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
-                      <span className="ml-2 text-sm text-gray-500">Memuat PDF...</span>
+                      <span className="ml-2 text-sm text-gray-500">Memuat dokumen...</span>
                     </div>
                   )}
-                  {pdfError && (
+                  {pdfError ? (
                     <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 p-4">
                       <FileText className="h-10 w-10 text-gray-300" />
                       <p className="text-sm text-gray-500 text-center">
-                        PDF tidak dapat ditampilkan di browser ini.
+                        Dokumen tidak dapat ditampilkan di sini.
                       </p>
                       <a href={item.pdf_url} target="_blank" rel="noopener noreferrer"
                         className="inline-flex items-center gap-1.5 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
-                        <ExternalLink className="h-3.5 w-3.5" /> Download PDF
+                        <ExternalLink className="h-3.5 w-3.5" /> Buka / Download PDF
                       </a>
                     </div>
+                  ) : (
+                    <iframe
+                      src={`https://docs.google.com/viewer?url=${encodeURIComponent(item.pdf_url)}&embedded=true`}
+                      className="w-full h-full border-0"
+                      title={item.pdf_name || 'Lampiran PDF'}
+                      onLoad={() => setPdfLoaded(true)}
+                      onError={() => setPdfError(true)}
+                    />
                   )}
-                  <iframe
-                    src={`${item.pdf_url}#toolbar=1&navpanes=0&scrollbar=1`}
-                    className="w-full h-full"
-                    title={item.pdf_name || 'Lampiran PDF'}
-                    onLoad={() => setPdfLoaded(true)}
-                    onError={() => setPdfError(true)}
-                    style={{ display: pdfError ? 'none' : 'block' }}
-                  />
                 </div>
               </div>
             )}
