@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   ClipboardList, Loader2, Plus, CheckCircle2,
-  Edit3, Send, Calendar, Building2, AlertCircle,
+  Edit3, Send, Calendar, Building2, AlertCircle, RotateCcw,
 } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../contexts/AuthContext'
@@ -89,6 +89,20 @@ export default function RTMPage() {
         .eq('id', rtmId)
       if (e) throw e
       setRtmList(list => list.map(r => r.id === rtmId ? { ...r, is_published: true } : r))
+    } catch (err) {
+      setError(err.message)
+    }
+  }
+
+  async function reopenRTM(rtmId) {
+    if (!confirm('Buka kembali RTM ini? Status akan kembali ke Draft.')) return
+    try {
+      const { error: e } = await supabase
+        .from('rtm_sessions')
+        .update({ is_published: false, updated_at: new Date().toISOString() })
+        .eq('id', rtmId)
+      if (e) throw e
+      setRtmList(list => list.map(r => r.id === rtmId ? { ...r, is_published: false } : r))
     } catch (err) {
       setError(err.message)
     }
@@ -203,12 +217,20 @@ export default function RTMPage() {
                       </>
                     )}
                     {rtm.is_published && (
-                      <button
-                        onClick={() => navigate(`/rtm/${rtm.id}`)}
-                        className="inline-flex items-center gap-1.5 rounded-md border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-50"
-                      >
-                        <CheckCircle2 className="h-3 w-3 text-green-500" /> Lihat Detail
-                      </button>
+                      <>
+                        <button
+                          onClick={() => navigate(`/rtm/${rtm.id}`)}
+                          className="inline-flex items-center gap-1.5 rounded-md border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-50"
+                        >
+                          <CheckCircle2 className="h-3 w-3 text-green-500" /> Lihat Detail
+                        </button>
+                        <button
+                          onClick={() => reopenRTM(rtm.id)}
+                          className="inline-flex items-center gap-1.5 rounded-md border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs font-medium text-amber-700 hover:bg-amber-100"
+                        >
+                          <RotateCcw className="h-3 w-3" /> Buka Kembali
+                        </button>
+                      </>
                     )}
                   </div>
                 </div>

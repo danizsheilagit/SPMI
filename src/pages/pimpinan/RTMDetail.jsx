@@ -9,7 +9,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import {
   ChevronLeft, Loader2, Save, Check, AlertCircle,
   Building2, ChevronDown, ChevronRight, Calendar,
-  ClipboardList, FileText,
+  ClipboardList, FileText, RotateCcw, User,
 } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../contexts/AuthContext'
@@ -67,7 +67,7 @@ export default function RTMDetail() {
           instruments( id, code, name ),
           submissions(
             id, status,
-            audit_findings ( id, rubric_results, category )
+            audit_findings ( id, auditor_id, rubric_results, category, profiles:auditor_id(full_name, email) )
           )
         `)
         .eq('cycle_id', rtmData.cycle_id)
@@ -110,29 +110,54 @@ export default function RTMDetail() {
         // Filter: hanya unit dalam scope pimpinan yang login
         if (unit.assigned_pimpinan_id !== user.id) continue
 
-        // Ambil audit_finding dari submission
-        const sub     = ui.submissions?.[0]
-        const finding = sub?.audit_findings?.[0]
-        if (!finding?.rubric_results) continue  // skip jika belum ada desk evaluasi
+        // Ambil ALL audit_findings dari submission (multi-auditor)
+        const sub      = ui.submissions?.[0]
+        const findings = sub?.audit_findings || []
+        if (findings.length === 0) continue  // skip jika belum ada desk evaluasi
 
-        const rubric = finding.rubric_results
         const comps  = compsByInstrument[instrument.id] || []
 
-        // Semua komponen yang sudah diaudit (ada di rubric_results), termasuk 'sesuai'
+        // Gabungkan semua rubric_results dari semua auditor
+        // Per komponen: ambil data dari masing-masing auditor
         const relevantComps = comps
-          .filter(c => rubric[c.id]?.category != null)
-          .map(c => ({
-            comp:       c,
-            finding,
-            deskScore:  rubric[c.id]?.desk_score,
-            category:   rubric[c.id]?.category,
-            catatan:    rubric[c.id]?.catatan,
-            rtmFinding: rtmFindingMap[`${unit.id}_${c.id}`] || null,
-          }))
+          .filter(c => {
+            // Komponen relevan jika setidaknya satu auditor sudah evaluasi
+            return findings.some(f => f.rubric_results?.[c.id]?.category != null)
+          })
+          .map(c => {
+            // Kumpulkan data per auditor untuk komponen ini
+            const auditorFindings = findings
+              .filter(f => f.rubric_results?.[c.id]?.category != null)
+              .map(f => ({
+                auditor_name: f.profiles?.full_name || f.profiles?.email || 'Auditor',
+                auditor_id: f.auditor_id,
+                desk_score: f.rubric_results[c.id]?.desk_score,
+                category: f.rubric_results[c.id]?.category,
+                catatan: f.rubric_results[c.id]?.catatan,
+                rekomendasi: f.rubric_results[c.id]?.rekomendasi,
+              }))
+            // Untuk summary: ambil kategori terburuk
+            const worstCategory = auditorFindings.reduce((worst, af) => {
+              const order = ['KTS_M', 'KTS_m', 'OB', 'SPT', 'sesuai']
+              return order.indexOf(af.category) < order.indexOf(worst) ? af.category : worst
+            }, 'sesuai')
+            const avgScore = auditorFindings.length > 0
+              ? Math.round(auditorFindings.reduce((s, af) => s + (af.desk_score || 0), 0) / auditorFindings.length)
+              : null
+            return {
+              comp:       c,
+              findings,
+              auditorFindings,
+              deskScore:  avgScore,
+              category:   worstCategory,
+              catatan:    auditorFindings.map(af => af.catatan).filter(Boolean).join('\n'),
+              rtmFinding: rtmFindingMap[`${unit.id}_${c.id}`] || null,
+            }
+          })
 
         if (relevantComps.length === 0) continue
 
-        groups.push({ unit, instrument, finding, components: relevantComps })
+        groups.push({ unit, instrument, findings, components: relevantComps })
         setExpanded(e => ({ ...e, [unit.id]: true }))
       }
 
@@ -213,6 +238,21 @@ export default function RTMDetail() {
     }
   }
 
+  async function handleReopen() {
+    if (!confirm('Buka kembali RTM ini? Status akan kembali ke Draft sehingga bisa diedit dan menunggu temuan auditor lainnya.')) return
+    setError(null)
+    try {
+      const { error: e } = await supabase
+        .from('rtm_sessions')
+        .update({ is_published: false })
+        .eq('id', rtmId)
+      if (e) throw e
+      setRtm(prev => ({ ...prev, is_published: false }))
+    } catch (err) {
+      setError('Gagal membuka kembali: ' + err.message)
+    }
+  }
+
   function startDrag(e) {
     const startX = e.clientX
     const startW = leftW
@@ -262,6 +302,15 @@ export default function RTMDetail() {
             <span className="rounded-full px-2.5 py-0.5 text-xs font-medium bg-green-100 text-green-700">
               ✅ Published — Read Only
             </span>
+          )}
+          {isPublished && (
+            <button
+              onClick={handleReopen}
+              className="inline-flex items-center gap-1.5 rounded-md border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs font-medium text-amber-700 hover:bg-amber-100"
+            >
+              <RotateCcw className="h-3 w-3" />
+              Buka Kembali
+            </button>
           )}
           {error && <p className="text-xs text-red-600 max-w-xs truncate">{error}</p>}
         </div>
@@ -390,6 +439,27 @@ export default function RTMDetail() {
                   <div className="mt-2 rounded bg-white border border-gray-200 px-3 py-2">
                     <p className="text-[11px] font-semibold text-gray-500 mb-0.5">Catatan Auditor</p>
                     <p className="text-xs text-gray-700">{selected.catatan}</p>
+                  </div>
+                )}
+
+                {/* Catatan dari semua auditor individual */}
+                {selected.auditorFindings && selected.auditorFindings.length > 1 && (
+                  <div className="mt-2 space-y-1.5">
+                    <p className="text-[11px] font-semibold text-gray-500">Detail Per Auditor</p>
+                    {selected.auditorFindings.map((af, i) => (
+                      <div key={i} className="rounded bg-white border border-gray-200 px-3 py-2">
+                        <div className="flex items-center gap-1.5 mb-1">
+                          <User className="h-3 w-3 text-gray-400" />
+                          <span className="text-[11px] font-semibold text-gray-600">{af.auditor_name}</span>
+                          <span className={`rounded px-1.5 py-0.5 border text-[10px] font-medium ${CATEGORY_COLOR[af.category]}`}>
+                            {CATEGORY_LABEL[af.category]}
+                          </span>
+                          <span className="text-[10px] text-gray-400">Skor: {af.desk_score ?? '—'}/5</span>
+                        </div>
+                        {af.catatan && <p className="text-xs text-gray-700">{af.catatan}</p>}
+                        {af.rekomendasi && <p className="text-xs text-gray-500 italic mt-0.5">Rekomendasi: {af.rekomendasi}</p>}
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>

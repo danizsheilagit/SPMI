@@ -14,7 +14,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import {
   ChevronLeft, Loader2, Save, Send, CheckCircle2,
   Circle, Lock, FileText, ExternalLink, AlertCircle,
-  Building2, ClipboardList, Info,
+  Building2, ClipboardList, Info, RotateCcw,
 } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../contexts/AuthContext'
@@ -52,8 +52,62 @@ function ScorePips({ score, max = 5 }) {
   )
 }
 
-/* ─── Auditee PPEPP read-only ───────────────────────────────── */
+/* ─── Auditee Text answer read-only ────────────────────── */
+function AuditeeTextCard({ component, answers }) {
+  const data = answers?.[component.id] || {}
+  const filled = !!data.text_answer && !!data.file_path
+
+  async function openFile(filePath) {
+    if (!filePath) return
+    const { data: d } = await supabase.storage
+      .from('evidence-files')
+      .createSignedUrl(filePath, 3600)
+    if (d?.signedUrl) window.open(d.signedUrl, '_blank')
+  }
+
+  return (
+    <div className="rounded-md border border-gray-200 bg-white overflow-hidden">
+      <div className="flex items-center justify-between px-4 py-3 bg-gray-50 border-b border-gray-100">
+        <div className="flex items-center gap-2">
+          <span className="text-[11px] font-bold text-violet-700 bg-violet-100 rounded px-1.5 py-0.5">
+            {component.code}
+          </span>
+          <span className="text-sm font-semibold text-gray-900">{component.name}</span>
+          <span className="rounded bg-violet-100 px-1.5 py-0.5 text-[10px] font-medium text-violet-700">Teks</span>
+        </div>
+        <span className={`text-xs font-bold ${filled ? 'text-green-600' : 'text-gray-400'}`}>
+          {filled ? '✓ Terisi' : 'Belum lengkap'}
+        </span>
+      </div>
+      <div className="px-4 py-3 space-y-2">
+        <div>
+          <p className="text-[11px] font-semibold text-gray-500 mb-0.5">Jawaban Teks</p>
+          <p className="text-xs text-gray-800 leading-relaxed bg-gray-50 rounded px-3 py-2 border border-gray-100">
+            {data.text_answer || <span className="text-gray-400 italic">Belum diisi</span>}
+          </p>
+        </div>
+        {data.file_path && (
+          <button
+            onClick={() => openFile(data.file_path)}
+            className="flex items-center gap-1 text-[11px] text-blue-600 hover:text-blue-800"
+          >
+            <FileText className="h-3 w-3 shrink-0" />
+            <span className="truncate">{data.file_name || 'Dokumen bukti'}</span>
+            <ExternalLink className="h-2.5 w-2.5 shrink-0" />
+          </button>
+        )}
+      </div>
+    </div>
+  )
+}
+
+/* ─── Auditee PPEPP read-only ───────────────────────────── */
 function AuditeeComponentCard({ component, answers }) {
+  const answerType = component.rubric_schema?.answer_type || 'ppepp'
+  if (answerType === 'text') {
+    return <AuditeeTextCard component={component} answers={answers} />
+  }
+
   const ppepp = answers?.[component.id] || {}
   const score = computePPEPPScore(ppepp)
 
@@ -264,6 +318,7 @@ export default function AuditorAuditDetail() {
   const [submitting,     setSubmitting]     = useState(false)
   const [saved,          setSaved]          = useState(false)
   const [error,          setError]          = useState(null)
+  const [sendingRevision, setSendingRevision] = useState(false)
 
   // Split pane
   const [leftWidth,  setLeftWidth]  = useState(45)
@@ -438,6 +493,29 @@ export default function AuditorAuditDetail() {
     }
   }
 
+  async function handleSendRevision() {
+    if (!submission) return
+    if (!confirm('Kirim saran perbaikan ke auditee? Status evaluasi akan dikembalikan untuk revisi.')) return
+    setSendingRevision(true)
+    setError(null)
+    try {
+      // Save current findings as saran
+      await handleSave()
+      // Update submission status to revision_needed
+      const { error: e } = await supabase
+        .from('submissions')
+        .update({ status: 'revision_needed' })
+        .eq('id', submission.id)
+      if (e) throw e
+      setSubmission(s => ({ ...s, status: 'revision_needed' }))
+      navigate('/auditor/assignments')
+    } catch (err) {
+      setError('Gagal mengirim saran: ' + err.message)
+    } finally {
+      setSendingRevision(false)
+    }
+  }
+
   // ── Render ─────────────────────────────────────────────────
   if (loading) {
     return (
@@ -508,15 +586,23 @@ export default function AuditorAuditDetail() {
             <>
               <button
                 onClick={handleSave}
-                disabled={saving || submitting}
+                disabled={saving || submitting || sendingRevision}
                 className="inline-flex items-center gap-1.5 rounded-md border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
               >
                 {saving ? <Loader2 className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3" />}
                 Simpan Draft
               </button>
               <button
+                onClick={handleSendRevision}
+                disabled={saving || submitting || sendingRevision}
+                className="inline-flex items-center gap-1.5 rounded-md border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs font-medium text-amber-700 hover:bg-amber-100 disabled:opacity-50"
+              >
+                {sendingRevision ? <Loader2 className="h-3 w-3 animate-spin" /> : <RotateCcw className="h-3 w-3" />}
+                Saran Perbaikan
+              </button>
+              <button
                 onClick={handleSubmit}
-                disabled={saving || submitting}
+                disabled={saving || submitting || sendingRevision}
                 className="inline-flex items-center gap-1.5 rounded-md bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700 shadow-sm disabled:opacity-50"
               >
                 {submitting ? <Loader2 className="h-3 w-3 animate-spin" /> : <Send className="h-3 w-3" />}

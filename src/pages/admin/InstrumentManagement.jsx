@@ -111,6 +111,7 @@ export default function InstrumentManagement() {
 
   async function handleSaveComp(form, editItem) {
     const rubric = {
+      answer_type: form.answer_type || 'ppepp',
       section: form.section,
       bukti_dokumen: form.bukti_dokumen,
       ppepp: {
@@ -360,7 +361,14 @@ export default function InstrumentManagement() {
                                   {comp.code}
                                 </span>
                                 <div className="flex-1 min-w-0">
-                                  <p className="text-sm text-gray-800">{comp.name}</p>
+                                  <div className="flex items-center gap-1.5">
+                                    <p className="text-sm text-gray-800">{comp.name}</p>
+                                    {comp.rubric_schema?.answer_type === 'text' && (
+                                      <span className="rounded bg-violet-100 px-1.5 py-0.5 text-[10px] font-medium text-violet-700 shrink-0">
+                                        Teks
+                                      </span>
+                                    )}
+                                  </div>
                                   {comp.rubric_schema?.bukti_dokumen && (
                                     <p className="text-xs text-gray-400 mt-0.5">
                                       📄 {comp.rubric_schema.bukti_dokumen}

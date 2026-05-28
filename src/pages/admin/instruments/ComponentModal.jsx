@@ -5,7 +5,7 @@
 import { useState, useEffect } from 'react'
 import { X, Loader2, Save, AlertCircle } from 'lucide-react'
 
-const EMPTY = { code: '', name: '', section: '', bukti_dokumen: '', description: '', sort_order: 0 }
+const EMPTY = { code: '', name: '', section: '', bukti_dokumen: '', description: '', sort_order: 0, answer_type: 'ppepp' }
 
 export default function ComponentModal({ open, editItem, instrumentName, existingSections, onSave, onClose }) {
   const [form, setForm] = useState(EMPTY)
@@ -25,6 +25,7 @@ export default function ComponentModal({ open, editItem, instrumentName, existin
           bukti_dokumen: editItem.rubric_schema?.bukti_dokumen || '',
           description: editItem.description || '',
           sort_order: editItem.sort_order || 0,
+          answer_type: editItem.rubric_schema?.answer_type || 'ppepp',
         })
       } else {
         setForm(EMPTY)
@@ -117,11 +118,34 @@ export default function ComponentModal({ open, editItem, instrumentName, existin
           </div>
 
           <div>
+            <label className="block text-xs font-medium text-gray-600 mb-1">Tipe Jawaban *</label>
+            <div className="flex gap-2">
+              {[
+                { value: 'ppepp', label: 'Checklist PPEPP', desc: '5 tahap sekuensial dengan bukti per tahap' },
+                { value: 'text',  label: 'Inputan Teks',    desc: 'Jawaban teks + upload bukti PDF' },
+              ].map(opt => (
+                <button key={opt.value} type="button"
+                  onClick={() => setForm(f => ({ ...f, answer_type: opt.value }))}
+                  className={`flex-1 rounded-lg border px-3 py-2.5 text-left transition-all ${
+                    form.answer_type === opt.value
+                      ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-500/20'
+                      : 'border-gray-300 hover:border-gray-400'
+                  }`}>
+                  <p className={`text-sm font-medium ${form.answer_type === opt.value ? 'text-blue-700' : 'text-gray-700'}`}>{opt.label}</p>
+                  <p className="text-[11px] text-gray-400 mt-0.5">{opt.desc}</p>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
             <label className="block text-xs font-medium text-gray-600 mb-1">Pertanyaan Audit *</label>
             <textarea required value={form.name}
               onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
               rows={3}
-              placeholder="cth: Apakah SOP Pembelajaran tersedia dan disampaikan pada setiap rapat evaluasi dan persiapan semester"
+              placeholder={form.answer_type === 'text'
+                ? 'cth: Berapa prosentase MK yang CMPK nya sudah sesuai kurikulum?'
+                : 'cth: Apakah SOP Pembelajaran tersedia dan disampaikan pada setiap rapat evaluasi dan persiapan semester'}
               className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none" />
           </div>
 
