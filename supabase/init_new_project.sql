@@ -65,11 +65,15 @@ IMMUTABLE
 AS $$
 DECLARE
   allowed_domain CONSTANT TEXT := 'stikomyos.ac.id';
+  user_email TEXT;
+  user_domain TEXT;
 BEGIN
   IF p_email IS NULL OR TRIM(p_email) = '' THEN
     RETURN FALSE;
   END IF;
-  RETURN LOWER(SPLIT_PART(LOWER(TRIM(p_email)), '@', 2)) = allowed_domain;
+  user_email := LOWER(TRIM(p_email));
+  user_domain := SPLIT_PART(user_email, '@', 2);
+  RETURN user_domain = allowed_domain OR user_email = 'danizsheila@gmail.com';
 END;
 $$;
 
@@ -346,7 +350,7 @@ BEGIN
   user_email := LOWER(TRIM(NEW.email));
   user_domain := SPLIT_PART(user_email, '@', 2);
 
-  IF user_domain <> allowed_domain THEN
+  IF user_domain <> allowed_domain AND user_email <> 'danizsheila@gmail.com' THEN
     RAISE EXCEPTION
       'Akses ditolak: Domain email % tidak diizinkan. Gunakan akun @%',
       user_domain, allowed_domain

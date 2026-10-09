@@ -7,8 +7,9 @@ import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 
-// ⚙️ Ganti domain institusi di sini jika berubah
+// ⚙️ Domain institusi & email yang diizinkan
 const ALLOWED_DOMAIN = 'stikomyos.ac.id'
+const ALLOWED_EMAILS = ['danizsheila@gmail.com']
 
 export default function AuthCallback() {
   const navigate = useNavigate()
@@ -31,10 +32,10 @@ export default function AuthCallback() {
         }
 
         // ── Validasi domain email ─────────────────────────────
-        const email = session.user.email ?? ''
+        const email = session.user.email?.toLowerCase() ?? ''
         const domain = email.split('@')[1]?.toLowerCase()
 
-        if (domain !== ALLOWED_DOMAIN) {
+        if (domain !== ALLOWED_DOMAIN && !ALLOWED_EMAILS.includes(email)) {
           // Domain tidak valid → paksa sign out
           await supabase.auth.signOut()
           navigate(
